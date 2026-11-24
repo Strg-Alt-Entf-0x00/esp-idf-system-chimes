@@ -1,0 +1,33 @@
+menu "System Chimes Configuration"
+
+    config CHIMES_DEFAULT_SAMPLE_RATE
+        int "Default sample rate (Hz)"
+        default 16000
+        help
+            Default sample rate for chime synthesis.
+            Common values: 8000, 16000, 44100, 48000
+
+    config CHIMES_DEFAULT_VOLUME
+        int "Default master volume (0-100)"
+        default 70
+        range 0 100
+        help
+            Default master volume as percentage (0-100).
+            This can be changed at runtime.
+
+    config CHIMES_ENABLED_BY_DEFAULT
+        bool "Enable chimes by default"
+        default y
+        help
+            Enable chimes on initialization.
+            Can be disabled at runtime if needed.
+
+    config CHIMES_LOG_LEVEL
+        int "Chimes log level"
+        default 3
+        range 0 5
+        help
+            Log level for system chimes component:
+            0: None, 1: Error, 2: Warning, 3: Info, 4: Debug, 5: Verbose
+
+endmenu

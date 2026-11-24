@@ -1,0 +1,3715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESP32 System Chimes Web Studio v2.1</title>
+  <style>
+    :root {
+      --bg-base: #080b12;
+      --bg-panel: #0e1422;
+      --bg-card: #131b2e;
+      --bg-input: #19233a;
+      --bg-hover: #1e2a45;
+      --border-color: #212d47;
+      --border-active: #00e5a3;
+      --text-main: #f1f5f9;
+      --text-dim: #94a3b8;
+      --text-muted: #64748b;
+      --accent-mint: #00e5a3;
+      --accent-cyan: #00f0ff;
+      --accent-amber: #ffb020;
+      --accent-orange: #ff763b;
+      --accent-crimson: #ff4757;
+      --accent-purple: #a855f7;
+      --font-mono: ui-monospace, "Cascadia Code", "Fira Code", monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background: var(--bg-base);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border-color);
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      gap: 12px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-badge {
+      background: linear-gradient(135deg, #00e5a3, #00b4d8);
+      color: #080b12;
+      font-weight: 900;
+      font-size: 13px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 12px rgba(0, 229, 163, 0.4);
+    }
+
+    .app-title {
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.2px;
+      color: #fff;
+    }
+
+    .version-chip {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      background: rgba(0, 240, 255, 0.12);
+      color: var(--accent-cyan);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+    }
+
+    /* Transport Controls */
+    .transport-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .btn {
+      background: var(--bg-input);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      background: var(--bg-hover);
+      border-color: #3b4d75;
+      color: #fff;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background: var(--accent-mint);
+      color: #080b12;
+      border-color: var(--accent-mint);
+    }
+
+    .btn-primary:hover {
+      background: #05ffb7;
+      border-color: #05ffb7;
+      box-shadow: 0 0 10px rgba(0, 229, 163, 0.4);
+      color: #080b12;
+    }
+
+    .btn-danger {
+      background: rgba(255, 71, 87, 0.15);
+      color: var(--accent-crimson);
+      border-color: rgba(255, 71, 87, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: var(--accent-crimson);
+      color: #fff;
+      border-color: var(--accent-crimson);
+    }
+
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    select, input[type="text"], input[type="number"] {
+      background: var(--bg-input);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 12px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    select:focus, input:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    input[type="range"] {
+      accent-color: var(--accent-mint);
+      height: 4px;
+      cursor: pointer;
+    }
+
+    /* Connection Badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(100, 116, 139, 0.15);
+      color: var(--text-muted);
+      border: 1px solid rgba(100, 116, 139, 0.3);
+    }
+
+    .status-badge.online {
+      background: rgba(0, 229, 163, 0.12);
+      color: var(--accent-mint);
+      border-color: rgba(0, 229, 163, 0.3);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .status-badge.online .status-dot {
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    /* Main Studio Grid Layout */
+    .main-workspace {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 52px - 28px);
+      overflow: hidden;
+    }
+
+    /* Left Sidebar: Tracks / Layers */
+    .tracks-panel {
+      width: 250px;
+      background: var(--bg-panel);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .panel-header {
+      padding: 10px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,0.15);
+    }
+
+    .tracks-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .track-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+
+    .track-card.active {
+      border-color: var(--accent-mint);
+      box-shadow: 0 0 10px rgba(0, 229, 163, 0.15);
+      background: #162238;
+    }
+
+    .track-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .track-name-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .track-color-pill {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .track-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .track-ctrls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-toggle {
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-input);
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-toggle.active-mute {
+      background: var(--accent-crimson);
+      color: #fff;
+      border-color: var(--accent-crimson);
+    }
+
+    .btn-toggle.active-solo {
+      background: var(--accent-amber);
+      color: #080b12;
+      border-color: var(--accent-amber);
+    }
+
+    .track-row-params {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      align-items: center;
+      font-size: 11px;
+    }
+
+    /* Center: Piano Roll + Inspector */
+    .center-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .piano-roll-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: #0a0e17;
+    }
+
+    #pianoCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;
+    }
+
+    /* Bottom: ADSR & Note Inspector */
+    .bottom-inspector {
+      height: 160px;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      flex-shrink: 0;
+    }
+
+    .inspector-block {
+      padding: 10px 16px;
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .adsr-curve-container {
+      width: 220px;
+      height: 100px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #adsrCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .adsr-sliders {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .slider-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+    }
+
+    .slider-col input[type="range"] {
+      writing-mode: bt-lr; /* IE/Edge */
+      -webkit-appearance: slider-vertical; /* WebKit */
+      width: 6px;
+      height: 60px;
+    }
+
+    /* Right Sidebar: Tabs (Hardware, C-Export, Terminal) */
+    .tools-sidebar {
+      width: 320px;
+      background: var(--bg-panel);
+      border-left: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .tab-nav {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(0,0,0,0.2);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 4px;
+      font-size: 11px;
+      font-weight: 600;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+    }
+
+    .tab-btn.active {
+      color: var(--accent-mint);
+      border-bottom-color: var(--accent-mint);
+      background: rgba(0, 229, 163, 0.05);
+    }
+
+    .tab-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .tab-content.active {
+      display: flex;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-dim);
+    }
+
+    .slot-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 8px;
+      border-radius: 6px;
+      background: var(--bg-input);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      border: 1px solid transparent;
+    }
+
+    .slot-row:hover {
+      border-color: #2c3a5c;
+    }
+
+    .code-preview {
+      flex: 1;
+      background: #06090e;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #c9d1d9;
+      white-space: pre;
+      overflow: auto;
+      user-select: text;
+    }
+
+    .terminal-log {
+      flex: 1;
+      background: #06090e;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #38bdf8;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      height: 250px;
+      user-select: text;
+    }
+
+    .log-entry {
+      line-height: 1.4;
+      word-break: break-all;
+    }
+    .log-tx { color: var(--accent-cyan); }
+    .log-rx { color: var(--accent-mint); }
+    .log-err { color: var(--accent-crimson); }
+    .log-info { color: var(--text-muted); }
+
+    /* Bottom Status Bar */
+    footer {
+      height: 28px;
+      background: #06090e;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    .stat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation & Transport -->
+  <header>
+    <div class="brand-section">
+      <div class="logo-badge">CHIMES</div>
+      <span class="app-title">ESP32 System Chimes Studio</span>
+      <span class="version-chip">v2.1</span>
+    </div>
+
+    <!-- Transport Controls -->
+    <div class="transport-bar">
+      <button class="btn btn-primary" id="btnPlay" title="Play / Pause (Spacebar)">
+        <span id="playIcon">▶</span> <span id="playText">Play</span>
+      </button>
+      <button class="btn" id="btnStop" title="Stop & Rewind">⏹ Stop</button>
+      
+      <div class="input-group" style="margin-left: 8px;">
+        <label>Snap:</label>
+        <select id="selSnap">
+          <option value="10">10 ms</option>
+          <option value="25" selected>25 ms</option>
+          <option value="50">50 ms</option>
+          <option value="100">100 ms</option>
+          <option value="250">250 ms</option>
+          <option value="0">Off</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>BPM:</label>
+        <input type="number" id="numBpm" value="120" min="40" max="300" style="width: 55px;">
+      </div>
+
+      <div class="input-group">
+        <label>Master Vol:</label>
+        <input type="range" id="rngMasterVol" min="0" max="1" step="0.05" value="0.8" style="width: 70px;">
+        <span id="txtMasterVol" style="width: 32px; font-family: var(--font-mono);">80%</span>
+      </div>
+    </div>
+
+    <!-- Presets & Actions -->
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <div class="input-group">
+        <label>Preset:</label>
+        <select id="selPresets" style="max-width: 170px;">
+          <option value="">-- Built-in Chimes --</option>
+        </select>
+      </div>
+
+      <button class="btn btn-sm" id="btnNew" title="New Sound">✨ New</button>
+      <button class="btn btn-sm" id="btnImport" title="Import JSON File">📂 Open</button>
+      <button class="btn btn-sm" id="btnExport" title="Save JSON File">💾 Save</button>
+      <input type="file" id="fileInput" accept=".json,.chime.json" style="display: none;">
+
+      <!-- Serial Connect Button -->
+      <button class="btn btn-sm" id="btnConnect" style="margin-left: 6px;">
+        <span class="status-dot"></span>
+        <span id="txtConnect">Connect ESP32</span>
+      </button>
+      <div class="status-badge" id="statusBadge">
+        <span class="status-dot"></span>
+        <span id="badgeText">Offline</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <div class="main-workspace">
+
+    <!-- Left: Track/Layer List -->
+    <div class="tracks-panel">
+      <div class="panel-header">
+        <span>Layers (<span id="layerCountText">1</span> / 8)</span>
+        <button class="btn btn-sm btn-primary" id="btnAddLayer" title="Add Layer">+ Add</button>
+      </div>
+      <div class="tracks-list" id="tracksList">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Center: Piano Roll + Inspector -->
+    <div class="center-section">
+      <!-- Piano Roll Canvas -->
+      <div class="piano-roll-container" id="pianoRollContainer">
+        <canvas id="pianoCanvas"></canvas>
+      </div>
+
+      <!-- Bottom Inspector -->
+      <div class="bottom-inspector">
+        <!-- Note details -->
+        <div class="inspector-block" style="width: 220px;">
+          <div class="card-title">Note Inspector</div>
+          <div style="font-size: 12px; display: flex; flex-direction: column; gap: 4px; font-family: var(--font-mono);">
+            <div>Pitch: <strong id="inspPitch" style="color: var(--accent-mint);">-</strong> (<span id="inspMidi">-</span>)</div>
+            <div>Freq: <span id="inspFreq">-</span> Hz</div>
+            <div>Start: <span id="inspStart">-</span> ms</div>
+            <div>Duration: <span id="inspDuration">-</span> ms</div>
+          </div>
+          <button class="btn btn-sm btn-danger" id="btnDeleteNote" style="margin-top: auto;" disabled>Delete Note</button>
+        </div>
+
+        <!-- ADSR Visualizer & Sliders -->
+        <div class="inspector-block" style="flex: 1;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="card-title">Layer Envelope (ADSR)</div>
+            <span id="adsrSummary" style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-cyan);">A:10ms D:50ms S:70% R:100ms</span>
+          </div>
+
+          <div style="display: flex; gap: 20px; align-items: center; flex: 1;">
+            <div class="adsr-curve-container">
+              <canvas id="adsrCanvas"></canvas>
+            </div>
+
+            <div class="adsr-sliders">
+              <div class="slider-col">
+                <input type="range" id="rngAttack" min="0" max="500" step="5" value="10">
+                <span>Atk</span>
+                <span id="txtAttack">10ms</span>
+              </div>
+              <div class="slider-col">
+                <input type="range" id="rngDecay" min="0" max="1000" step="10" value="50">
+                <span>Dec</span>
+                <span id="txtDecay">50ms</span>
+              </div>
+              <div class="slider-col">
+                <input type="range" id="rngSustain" min="0" max="1" step="0.05" value="0.7">
+                <span>Sus</span>
+                <span id="txtSustain">70%</span>
+              </div>
+              <div class="slider-col">
+                <input type="range" id="rngRelease" min="0" max="2000" step="10" value="100">
+                <span>Rel</span>
+                <span id="txtRelease">100ms</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right Sidebar: Hardware, C Export, Log -->
+    <div class="tools-sidebar">
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="tabHw">ESP32 Hardware</button>
+        <button class="tab-btn" data-tab="tabCode">C Code</button>
+        <button class="tab-btn" data-tab="tabLog">Console Log</button>
+      </div>
+
+      <!-- Tab 1: Hardware -->
+      <div class="tab-content active" id="tabHw">
+        <div class="card">
+          <div class="card-title">Target Slot Configuration</div>
+          <div class="input-group">
+            <label style="width: 60px;">Slot ID:</label>
+            <input type="text" id="txtSlotId" value="BOOT_SUCCESS" maxlength="15" style="flex: 1; font-family: var(--font-mono); text-transform: uppercase;">
+          </div>
+          <div class="input-group">
+            <label style="width: 60px;">Chime Name:</label>
+            <input type="text" id="txtProjectName" value="Boot Success" style="flex: 1;">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;">
+            <button class="btn btn-primary" id="btnUploadSlot" title="Upload current sound to this slot on ESP32">
+              ⬆ Upload to Slot
+            </button>
+            <button class="btn" id="btnPlayDevice" title="Trigger playback on ESP32 speaker">
+              🔊 Play on ESP32
+            </button>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <button class="btn btn-danger" id="btnStopDevice">⏹ Stop Device</button>
+            <button class="btn" id="btnQuerySlots">🔄 Query Slots</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Hardware Volume</div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="range" id="rngHwVol" min="0" max="1" step="0.05" value="0.8" style="flex: 1;">
+            <span id="txtHwVol" style="font-family: var(--font-mono); font-size: 11px; width: 35px;">80%</span>
+          </div>
+        </div>
+
+        <div class="card" style="flex: 1;">
+          <div class="card-title" style="display: flex; justify-content: space-between;">
+            <span>Registered Slots</span>
+            <span id="slotCountBadge" style="color: var(--accent-mint); font-family: var(--font-mono);">0 slots</span>
+          </div>
+          <div id="slotListContainer" style="display: flex; flex-direction: column; gap: 6px; overflow-y: auto; max-height: 240px;">
+            <div style="color: var(--text-muted); font-size: 11px; text-align: center; padding: 12px;">
+              Connect ESP32 & Query Slots to view onboard sounds.
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end;">
+          <button class="btn btn-sm btn-danger" id="btnEraseAll" title="Clear all stored sounds in chimes_v1 namespace">
+            ⚠️ Erase All Sounds
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab 2: C Code Exporter -->
+      <div class="tab-content" id="tabCode">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="card-title">C Struct Generator</div>
+          <button class="btn btn-sm btn-primary" id="btnCopyCode">📋 Copy C Code</button>
+        </div>
+        <div class="code-preview" id="codePreview">// C Code will be generated here...</div>
+      </div>
+
+      <!-- Tab 3: Serial Console Log -->
+      <div class="tab-content" id="tabLog">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="card-title">Raw Protocol Activity</div>
+          <button class="btn btn-sm" id="btnClearLog">Clear</button>
+        </div>
+        <div class="terminal-log" id="terminalLog"></div>
+        <div style="display: flex; gap: 6px;">
+          <input type="text" id="cmdInput" placeholder="Send raw command (e.g. QUERY_SLOTS)..." style="flex: 1; font-family: var(--font-mono); font-size: 11px;">
+          <button class="btn btn-sm" id="btnSendCmd">Send</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer Status Bar -->
+  <footer>
+    <div style="display: flex; gap: 16px;">
+      <span class="stat-pill">Duration: <strong id="statDuration" style="color: var(--accent-mint);">0 ms</strong></span>
+      <span class="stat-pill">Total Notes: <strong id="statNotes">0</strong></span>
+      <span class="stat-pill">Active Layers: <strong id="statLayers">1</strong></span>
+      <span class="stat-pill">Playhead: <strong id="statPlayhead" style="color: var(--accent-cyan);">0 ms</strong></span>
+    </div>
+    <div id="statLimits" style="color: var(--accent-mint);">
+      ✔ All parameters within ESP-IDF firmware limits
+    </div>
+  </footer>
+
+  <!-- SCRIPT -->
+  <script>
+    // Embedded Presets Library
+    const BUNDLED_PRESETS = {
+  "attention.chime.json": {
+    "project": {
+      "version": "2.1.0",
+      "name": "Attention Pulse",
+      "slot_id": "ATTENTION",
+      "total_duration_ms": 570,
+      "created": "2026-11-07T19:27:30.135550",
+      "modified": "2026-11-07T19:27:30.135573"
+    },
+    "global": {
+      "master_volume": 0.9,
+      "bpm": 120,
+      "snap_enabled": true,
+      "grid_resolution_ms": 25
+    },
+    "layers": [
+      {
+        "layer_id": 1,
+        "name": "Square 01",
+        "waveform": "SQUARE",
+        "volume": 0.62,
+        "mute": false,
+        "solo": false,
+        "default_adsr": {
+          "attack_ms": 2,
+          "decay_ms": 18,
+          "sustain": 0.3,
+          "release_ms": 35
+        },
+        "notes": [
+          {
+            "id": "b839c3a3-5965-4abb-92a5-6a12a3a24046",
+            "frequency_hz": 659.2551138257398,
+            "start_time_ms": 0,
+            "duration_ms": 160,
+            "adsr": {
+              "attack_ms": 2,
+              "decay_ms": 18,
+              "sustain": 0.3,
+              "release_ms": 35
+            }
+          },
+          {
+            "id": "a772a187-bd57-44e0-9909-5e42e958f324",
+            "frequency_hz": 523.2511306011972,
+            "start_time_ms": 200,
+            "duration_ms": 160,
+            "adsr": {
+              "attack_ms": 2,
+              "decay_ms": 18,
+              "sustain": 0.3,
+              "release_ms": 35
+            }
+          },
+          {
+            "id": "d49567f1-24a1-4f16-97ec-fc0c4c714285",
+            "frequency_hz": 659.2551138257398,
+            "start_time_ms": 400,
+            "duration_ms": 160,
+            "adsr": {
+              "attack_ms": 2,
+              "decay_ms": 18,
+              "sustain": 0.3,
+              "release_ms": 35
+            }
+          }
+        ]
+      },
+      {
+        "layer_id": 2,
+        "name": "Noise 02",
+        "waveform": "NOISE",
+        "volume": 0.16,
+        "mute": false,
+        "solo": false,
+        "default_adsr": {
+          "attack_ms": 1,
+          "decay_ms": 20,
+          "sustain": 0.15,
+          "release_ms": 90
+        },
+        "notes": [
+          {
+            "id": "9501da23-2559-4037-9898-2d862ff918d1",
+            "frequency_hz": 523.2511306011972,
+            "start_time_ms": 10,
+            "duration_ms": 560,
+            "adsr": {
+              "attack_ms": 1,
+              "decay_ms": 20,
+              "sustain": 0.15,
+              "release_ms": 90
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "battery_low.chime.json": {
+    "project": {
+      "version": "2.1.0",
+      "name": "Low Battery",
+      "slot_id": "BATTERY_LOW",
+      "total_duration_ms": 610,
+      "created": "2026-11-07T00:00:00",
+      "modified": "2026-11-07T00:00:00"
+    },
+    "global": {
+      "master_volume": 0.85,
+      "bpm": 120,
+      "snap_enabled": true,
+      "grid_resolution_ms": 10
+    },
+    "layers": [
+      {
+        "layer_id": 1,
+        "name": "Battery Alert",
+        "waveform": "TRIANGLE",
+        "volume": 0.65,
+        "mute": false,
+        "solo": false,
+        "default_adsr": {
+          "attack_ms": 5,
+          "decay_ms": 40,
+          "sustain": 0.45,
+          "release_ms": 75
+        },
+        "notes": [
+          {
+            "id": "30000000-0000-4000-8000-000000000001",
+            "frequency_hz": 783.99,
+            "start_time_ms": 0,
+            "duration_ms": 160,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 40,
+              "sustain": 0.45,
+              "release_ms": 75
+            }
+          },
+          {
+            "id": "30000000-0000-4000-8000-000000000002",
+            "frequency_hz": 659.25,
+            "start_time_ms": 220,
+            "duration_ms": 160,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 40,
+              "sustain": 0.45,
+              "release_ms": 75
+            }
+          },
+          {
+            "id": "30000000-0000-4000-8000-000000000003",
+            "frequency_hz": 523.25,
+            "start_time_ms": 440,
+            "duration_ms": 170,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 40,
+              "sustain": 0.45,
+              "release_ms": 75
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "clock_hourly.chime.json": {
+    "project": {
+      "version": "2.1.0",
+      "name": "Hourly Clock Chime",
+      "slot_id": "CLOCK_HOUR",
+      "total_duration_ms": 1160,
+      "created": "2026-11-07T00:00:00",
+      "modified": "2026-11-07T00:00:00"
+    },
+    "global": {
+      "master_volume": 0.9,
+      "bpm": 120,
+      "snap_enabled": true,
+      "grid_resolution_ms": 10
+    },
+    "layers": [
+      {
+        "layer_id": 1,
+        "name": "Clock Chime",
+        "waveform": "SINE",
+        "volume": 0.72,
+        "mute": false,
+        "solo": false,
+        "default_adsr": {
+          "attack_ms": 12,
+          "decay_ms": 60,
+          "sustain": 0.52,
+          "release_ms": 180
+        },
+        "notes": [
+          {
+            "id": "60000000-0000-4000-8000-000000000001",
+            "frequency_hz": 659.25,
+            "start_time_ms": 0,
+            "duration_ms": 220,
+            "adsr": {
+              "attack_ms": 12,
+              "decay_ms": 60,
+              "sustain": 0.52,
+              "release_ms": 180
+            }
+          },
+          {
+            "id": "60000000-0000-4000-8000-000000000002",
+            "frequency_hz": 783.99,
+            "start_time_ms": 300,
+            "duration_ms": 220,
+            "adsr": {
+              "attack_ms": 12,
+              "decay_ms": 60,
+              "sustain": 0.52,
+              "release_ms": 180
+            }
+          },
+          {
+            "id": "60000000-0000-4000-8000-000000000003",
+            "frequency_hz": 587.33,
+            "start_time_ms": 620,
+            "duration_ms": 220,
+            "adsr": {
+              "attack_ms": 12,
+              "decay_ms": 60,
+              "sustain": 0.52,
+              "release_ms": 180
+            }
+          },
+          {
+            "id": "60000000-0000-4000-8000-000000000004",
+            "frequency_hz": 880,
+            "start_time_ms": 940,
+            "duration_ms": 220,
+            "adsr": {
+              "attack_ms": 12,
+              "decay_ms": 60,
+              "sustain": 0.52,
+              "release_ms": 180
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "critical_temperature.chime.json": {
+    "project": {
+      "version": "2.1.0",
+      "name": "Critical Temperature",
+      "slot_id": "TEMP_CRIT",
+      "total_duration_ms": 820,
+      "created": "2026-11-07T00:00:00",
+      "modified": "2026-11-07T00:00:00"
+    },
+    "global": {
+      "master_volume": 0.8,
+      "bpm": 120,
+      "snap_enabled": true,
+      "grid_resolution_ms": 10
+    },
+    "layers": [
+      {
+        "layer_id": 1,
+        "name": "Critical Thermal Alert",
+        "waveform": "SAWTOOTH",
+        "volume": 0.42,
+        "mute": false,
+        "solo": false,
+        "default_adsr": {
+          "attack_ms": 2,
+          "decay_ms": 30,
+          "sustain": 0.35,
+          "release_ms": 60
+        },
+        "notes": [
+          {
+            "id": "50000000-0000-4000-8000-000000000001",
+            "frequency_hz": 1046.5,
+            "start_time_ms": 0,
+            "duration_ms": 180,
+            "adsr": {
+              "attack_ms": 2,
+              "decay_ms": 30,
+              "sustain": 0.35,
+              "release_ms": 60
+            }
+          },
+          {
+            "id": "50000000-0000-4000-8000-000000000002",
+            "frequency_hz": 783.99,
+            "start_time_ms": 250,
+            "duration_ms": 180,
+            "adsr": {
+              "attack_ms": 2,
+              "decay_ms": 30,
+              "sustain": 0.35,
+              "release_ms": 60
+            }
+          },
+          {
+            "id": "50000000-0000-4000-8000-000000000003",
+            "frequency_hz": 523.25,
+            "start_time_ms": 510,
+            "duration_ms": 310,
+            "adsr": {
+              "attack_ms": 2,
+              "decay_ms": 30,
+              "sustain": 0.35,
+              "release_ms": 60
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "low_confirm.chime.json": {
+    "project": {
+      "version": "2.1.0",
+      "name": "Low Confirm",
+      "slot_id": "LOW_CONFIRM",
+      "total_duration_ms": 320,
+      "created": "2026-11-07T19:27:30.139807",
+      "modified": "2026-11-07T19:27:30.139824"
+    },
+    "global": {
+      "master_volume": 0.9,
+      "bpm": 120,
+      "snap_enabled": true,
+      "grid_resolution_ms": 25
+    },
+    "layers": [
+      {
+        "layer_id": 1,
+        "name": "Sawtooth 01",
+        "waveform": "SAWTOOTH",
+        "volume": 0.48,
+        "mute": false,
+        "solo": false,
+        "default_adsr": {
+          "attack_ms": 3,
+          "decay_ms": 30,
+          "sustain": 0.38,
+          "release_ms": 45
+        },
+        "notes": [
+          {
+            "id": "00a16e76-a807-4a56-94e7-1743aa179c89",
+            "frequency_hz": 261.6255653005986,
+            "start_time_ms": 0,
+            "duration_ms": 320,
+            "adsr": {
+              "attack_ms": 3,
+              "decay_ms": 30,
+              "sustain": 0.38,
+              "release_ms": 45
+            }
+          }
+        ]
+      },
+      {
+        "layer_id": 2,
+        "name": "Sine 02",
+        "waveform": "SINE",
+        "volume": 0.26,
+        "mute": false,
+        "solo": false,
+        "default_adsr": {
+          "attack_ms": 5,
+          "decay_ms": 35,
+          "sustain": 0.3,
+          "release_ms": 40
+        },
+        "notes": [
+          {
+            "id": "2ca06b62-22fb-4084-ae30-b81910b62552",
+            "frequency_hz": 391.99543598174927,
+            "start_time_ms": 20,
+            "duration_ms": 280,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 35,
+              "sustain": 0.3,
+              "release_ms": 40
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "network_connected.chime.json": {
+    "project": {
+      "version": "2.1.0",
+      "name": "Network Connected",
+      "slot_id": "NETWORK_UP",
+      "total_duration_ms": 320,
+      "created": "2026-11-07T00:00:00",
+      "modified": "2026-11-07T00:00:00"
+    },
+    "global": {
+      "master_volume": 0.9,
+      "bpm": 120,
+      "snap_enabled": true,
+      "grid_resolution_ms": 10
+    },
+    "layers": [
+      {
+        "layer_id": 1,
+        "name": "Connected",
+        "waveform": "SINE",
+        "volume": 0.7,
+        "mute": false,
+        "solo": false,
+        "default_adsr": {
+          "attack_ms": 8,
+          "decay_ms": 35,
+          "sustain": 0.55,
+          "release_ms": 65
+        },
+        "notes": [
+          {
+            "id": "10000000-0000-4000-8000-000000000001",
+            "frequency_hz": 587.33,
+            "start_time_ms": 0,
+            "duration_ms": 125,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.55,
+              "release_ms": 65
+            }
+          },
+          {
+            "id": "10000000-0000-4000-8000-000000000002",
+            "frequency_hz": 783.99,
+            "start_time_ms": 170,
+            "duration_ms": 150,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.55,
+              "release_ms": 65
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "network_disconnected.chime.json": {
+    "project": {
+      "version": "2.1.0",
+      "name": "Network Disconnected",
+      "slot_id": "NETWORK_DOWN",
+      "total_duration_ms": 320,
+      "created": "2026-11-07T00:00:00",
+      "modified": "2026-11-07T00:00:00"
+    },
+    "global": {
+      "master_volume": 0.9,
+      "bpm": 120,
+      "snap_enabled": true,
+      "grid_resolution_ms": 10
+    },
+    "layers": [
+      {
+        "layer_id": 1,
+        "name": "Disconnected",
+        "waveform": "TRIANGLE",
+        "volume": 0.65,
+        "mute": false,
+        "solo": false,
+        "default_adsr": {
+          "attack_ms": 5,
+          "decay_ms": 45,
+          "sustain": 0.5,
+          "release_ms": 75
+        },
+        "notes": [
+          {
+            "id": "20000000-0000-4000-8000-000000000001",
+            "frequency_hz": 783.99,
+            "start_time_ms": 0,
+            "duration_ms": 125,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 45,
+              "sustain": 0.5,
+              "release_ms": 75
+            }
+          },
+          {
+            "id": "20000000-0000-4000-8000-000000000002",
+            "frequency_hz": 587.33,
+            "start_time_ms": 170,
+            "duration_ms": 150,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 45,
+              "sustain": 0.5,
+              "release_ms": 75
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "retro_puzzle.chime.json": {
+    "project": {
+      "version": "2.1.0",
+      "name": "Original Retro Puzzle Melody",
+      "slot_id": "RETRO_PUZZLE",
+      "total_duration_ms": 12722,
+      "created": "2026-11-07T19:27:30.122438",
+      "modified": "2026-11-07T19:27:30.122549"
+    },
+    "global": {
+      "master_volume": 0.9,
+      "bpm": 108,
+      "snap_enabled": true,
+      "grid_resolution_ms": 25
+    },
+    "layers": [
+      {
+        "layer_id": 1,
+        "name": "Square 01",
+        "waveform": "SQUARE",
+        "volume": 0.72,
+        "mute": false,
+        "solo": false,
+        "default_adsr": {
+          "attack_ms": 8,
+          "decay_ms": 35,
+          "sustain": 0.58,
+          "release_ms": 40
+        },
+        "notes": [
+          {
+            "id": "cd19a200-0c35-436b-89fc-5379f2c97f2a",
+            "frequency_hz": 587.3295358348151,
+            "start_time_ms": 0,
+            "duration_ms": 400,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "93b71b06-9e5b-44b6-babc-05934f78e334",
+            "frequency_hz": 698.4564628660078,
+            "start_time_ms": 417,
+            "duration_ms": 178,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "0ba38a24-4db7-4593-ad63-b2174deade56",
+            "frequency_hz": 783.9908719634985,
+            "start_time_ms": 611,
+            "duration_ms": 306,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "79c67ce2-fdf0-4acb-a42e-59c0db0419ae",
+            "frequency_hz": 880.0,
+            "start_time_ms": 972,
+            "duration_ms": 189,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "5cc3a031-5fd7-41c6-a57d-d0c6275f0d6d",
+            "frequency_hz": 783.9908719634985,
+            "start_time_ms": 1183,
+            "duration_ms": 378,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "d58adc18-9286-4a86-a2f7-debca38d1eed",
+            "frequency_hz": 523.2511306011972,
+            "start_time_ms": 1667,
+            "duration_ms": 233,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "6d902a5e-7ec0-4ea2-a9ac-0a7a5c2e7a6c",
+            "frequency_hz": 587.3295358348151,
+            "start_time_ms": 1933,
+            "duration_ms": 189,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "14f96e82-9d6c-4b5c-9002-bba283b0bcc0",
+            "frequency_hz": 698.4564628660078,
+            "start_time_ms": 2144,
+            "duration_ms": 417,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "377772c3-1150-4510-8d5d-c20b2b2b84d7",
+            "frequency_hz": 659.2551138257398,
+            "start_time_ms": 2622,
+            "duration_ms": 194,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "8303d50b-d4ce-45e1-8c91-10cf6923288f",
+            "frequency_hz": 523.2511306011972,
+            "start_time_ms": 2822,
+            "duration_ms": 233,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "3e9640a6-ee15-438e-9011-abb0f43d0c6b",
+            "frequency_hz": 587.3295358348151,
+            "start_time_ms": 3083,
+            "duration_ms": 361,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "58353ecf-2aa9-40a5-9bdd-b1717f3f5435",
+            "frequency_hz": 440.0,
+            "start_time_ms": 3528,
+            "duration_ms": 167,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "5d8d26fb-1c9b-464b-9bdc-19af3effa85b",
+            "frequency_hz": 523.2511306011972,
+            "start_time_ms": 3722,
+            "duration_ms": 289,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "1edcc302-ca79-4ea8-9112-10b767d81b38",
+            "frequency_hz": 698.4564628660078,
+            "start_time_ms": 4044,
+            "duration_ms": 194,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "26174a44-ee8b-4e35-b2f0-710bfa1c231f",
+            "frequency_hz": 659.2551138257398,
+            "start_time_ms": 4267,
+            "duration_ms": 267,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "17ca8b5c-a5da-437f-a057-3fa88d796fc8",
+            "frequency_hz": 587.3295358348151,
+            "start_time_ms": 4567,
+            "duration_ms": 411,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "0e7eab97-78dd-498b-975d-4b4bf8687327",
+            "frequency_hz": 440.0,
+            "start_time_ms": 5028,
+            "duration_ms": 211,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "0e874724-f7f2-405b-9021-cb11898758bc",
+            "frequency_hz": 523.2511306011972,
+            "start_time_ms": 5267,
+            "duration_ms": 511,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "4f3f57b9-6460-4bd7-9f84-9fd9bb4fb836",
+            "frequency_hz": 587.3295358348151,
+            "start_time_ms": 5822,
+            "duration_ms": 200,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "f4028ac4-ce81-49c8-8bcb-792523f05c04",
+            "frequency_hz": 698.4564628660078,
+            "start_time_ms": 6044,
+            "duration_ms": 278,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          },
+          {
+            "id": "741ec616-78ee-404b-8a12-e6c57ba7ea9a",
+            "frequency_hz": 523.2511306011972,
+            "start_time_ms": 6361,
+            "duration_ms": 583,
+            "adsr": {
+              "attack_ms": 8,
+              "decay_ms": 35,
+              "sustain": 0.58,
+              "release_ms": 40
+            }
+          }
+        ]
+      },
+      {
+        "layer_id": 2,
+        "name": "Triangle 02",
+        "waveform": "TRIANGLE",
+        "volume": 0.58,
+        "mute": false,
+        "solo": false,
+        "default_adsr": {
+          "attack_ms": 5,
+          "decay_ms": 45,
+          "sustain": 0.48,
+          "release_ms": 45
+        },
+        "notes": [
+          {
+            "id": "105cbe93-1b2b-4cab-b705-17880555a623",
+            "frequency_hz": 146.8323839587038,
+            "start_time_ms": 0,
+            "duration_ms": 267,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 45,
+              "sustain": 0.48,
+              "release_ms": 45
+            }
+          },
+          {
+            "id": "acd3bfa6-8182-411b-98d1-732cf182ee3b",
+            "frequency_hz": 146.8323839587038,
+            "start_time_ms": 1667,
+            "duration_ms": 267,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 45,
+              "sustain": 0.48,
+              "release_ms": 45
+            }
+          },
+          {
+            "id": "07e83cbf-5af7-4b78-9b0d-e2311a3effe5",
+            "frequency_hz": 146.8323839587038,
+            "start_time_ms": 3333,
+            "duration_ms": 267,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 45,
+              "sustain": 0.48,
+              "release_ms": 45
+            }
+          },
+          {
+            "id": "1f59222d-246a-47b7-bbcb-eae6183eb6f1",
+            "frequency_hz": 146.8323839587038,
+            "start_time_ms": 5000,
+            "duration_ms": 267,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 45,
+              "sustain": 0.48,
+              "release_ms": 45
+            }
+          },
+          {
+            "id": "0b96861b-9184-4acb-bd97-3b00673f4223",
+            "frequency_hz": 146.8323839587038,
+            "start_time_ms": 6667,
+            "duration_ms": 267,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 45,
+              "sustain": 0.48,
+              "release_ms": 45
+            }
+          },
+          {
+            "id": "0f344464-e71f-45c6-a67b-f1ca37c31f8f",
+            "frequency_hz": 146.8323839587038,
+            "start_time_ms": 8333,
+            "duration_ms": 267,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 45,
+              "sustain": 0.48,
+              "release_ms": 45
+            }
+          },
+          {
+            "id": "52b821c1-b8e9-46b5-9c79-8e1911c4ff0f",
+            "frequency_hz": 146.8323839587038,
+            "start_time_ms": 10000,
+            "duration_ms": 267,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 45,
+              "sustain": 0.48,
+              "release_ms": 45
+            }
+          },
+          {
+            "id": "a939a063-3d2f-41a0-a298-5cc008afe187",
+            "frequency_hz": 146.8323839587038,
+            "start_time_ms": 11667,
+            "duration_ms": 267,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 45,
+              "sustain": 0.48,
+              "release_ms": 45
+            }
+          }
+        ]
+      },
+      {
+        "layer_id": 3,
+        "name": "Sine 03",
+        "waveform": "SINE",
+        "volume": 0.38,
+        "mute": false,
+        "solo": false,
+        "default_adsr": {
+          "attack_ms": 5,
+          "decay_ms": 30,
+          "sustain": 0.4,
+          "release_ms": 35
+        },
+        "notes": [
+          {
+            "id": "7dd20144-b3ce-4bcb-8de2-62364a04cc3c",
+            "frequency_hz": 220.0,
+            "start_time_ms": 844,
+            "duration_ms": 211,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 30,
+              "sustain": 0.4,
+              "release_ms": 35
+            }
+          },
+          {
+            "id": "a7c3dc0d-d189-4e3a-bd3a-e90ec05bbb8f",
+            "frequency_hz": 293.6647679174076,
+            "start_time_ms": 2511,
+            "duration_ms": 211,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 30,
+              "sustain": 0.4,
+              "release_ms": 35
+            }
+          },
+          {
+            "id": "5f2c4f9a-1d05-4328-9669-f91b99aa8f17",
+            "frequency_hz": 329.6275569128699,
+            "start_time_ms": 4178,
+            "duration_ms": 211,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 30,
+              "sustain": 0.4,
+              "release_ms": 35
+            }
+          },
+          {
+            "id": "49721574-d83b-44c6-9b5d-9f2944091d2c",
+            "frequency_hz": 261.6255653005986,
+            "start_time_ms": 5844,
+            "duration_ms": 211,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 30,
+              "sustain": 0.4,
+              "release_ms": 35
+            }
+          },
+          {
+            "id": "f7955f93-1294-42cd-9491-fba3453f20a1",
+            "frequency_hz": 220.0,
+            "start_time_ms": 7511,
+            "duration_ms": 211,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 30,
+              "sustain": 0.4,
+              "release_ms": 35
+            }
+          },
+          {
+            "id": "c7cdd4d0-5fdf-4e60-919a-7396bebeac49",
+            "frequency_hz": 329.6275569128699,
+            "start_time_ms": 9178,
+            "duration_ms": 211,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 30,
+              "sustain": 0.4,
+              "release_ms": 35
+            }
+          },
+          {
+            "id": "0768fae1-ef0b-491d-8e81-9d1d184b6dbe",
+            "frequency_hz": 293.6647679174076,
+            "start_time_ms": 10844,
+            "duration_ms": 211,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 30,
+              "sustain": 0.4,
+              "release_ms": 35
+            }
+          },
+          {
+            "id": "d1e48bc1-8d3f-413c-87d1-0dbf19e2d75e",
+            "frequency_hz": 220.0,
+            "start_time_ms": 12511,
+            "duration_ms": 211,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 30,
+              "sustain": 0.4,
+              "release_ms": 35
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "success_chime.chime.json": {
+    "project": {
+      "version": "2.1.0",
+      "name": "Success Chime",
+      "slot_id": "SUCCESS_CHIME",
+      "total_duration_ms": 720,
+      "created": "2026-11-07T19:27:30.131412",
+      "modified": "2026-11-07T19:27:30.131417"
+    },
+    "global": {
+      "master_volume": 0.9,
+      "bpm": 120,
+      "snap_enabled": true,
+      "grid_resolution_ms": 25
+    },
+    "layers": [
+      {
+        "layer_id": 1,
+        "name": "Triangle 01",
+        "waveform": "TRIANGLE",
+        "volume": 0.7,
+        "mute": false,
+        "solo": false,
+        "default_adsr": {
+          "attack_ms": 5,
+          "decay_ms": 25,
+          "sustain": 0.62,
+          "release_ms": 55
+        },
+        "notes": [
+          {
+            "id": "33963520-e311-4baa-87c5-b94d86a41bff",
+            "frequency_hz": 523.2511306011972,
+            "start_time_ms": 0,
+            "duration_ms": 190,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 25,
+              "sustain": 0.62,
+              "release_ms": 55
+            }
+          },
+          {
+            "id": "57f47e9f-bede-4954-b624-b80e81b8e70a",
+            "frequency_hz": 659.2551138257398,
+            "start_time_ms": 120,
+            "duration_ms": 220,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 25,
+              "sustain": 0.62,
+              "release_ms": 55
+            }
+          },
+          {
+            "id": "c190cdc8-f469-479f-807e-f1e0dc8c6681",
+            "frequency_hz": 783.9908719634985,
+            "start_time_ms": 260,
+            "duration_ms": 460,
+            "adsr": {
+              "attack_ms": 5,
+              "decay_ms": 25,
+              "sustain": 0.62,
+              "release_ms": 55
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "temperature_warning.chime.json": {
+    "project": {
+      "version": "2.1.0",
+      "name": "Temperature Warning",
+      "slot_id": "TEMP_WARN",
+      "total_duration_ms": 740,
+      "created": "2026-11-07T00:00:00",
+      "modified": "2026-11-07T00:00:00"
+    },
+    "global": {
+      "master_volume": 0.8,
+      "bpm": 120,
+      "snap_enabled": true,
+      "grid_resolution_ms": 10
+    },
+    "layers": [
+      {
+        "layer_id": 1,
+        "name": "Thermal Warning",
+        "waveform": "SQUARE",
+        "volume": 0.5,
+        "mute": false,
+        "solo": false,
+        "default_adsr": {
+          "attack_ms": 3,
+          "decay_ms": 35,
+          "sustain": 0.38,
+          "release_ms": 55
+        },
+        "notes": [
+          {
+            "id": "40000000-0000-4000-8000-000000000001",
+            "frequency_hz": 880,
+            "start_time_ms": 0,
+            "duration_ms": 130,
+            "adsr": {
+              "attack_ms": 3,
+              "decay_ms": 35,
+              "sustain": 0.38,
+              "release_ms": 55
+            }
+          },
+          {
+            "id": "40000000-0000-4000-8000-000000000002",
+            "frequency_hz": 659.25,
+            "start_time_ms": 200,
+            "duration_ms": 130,
+            "adsr": {
+              "attack_ms": 3,
+              "decay_ms": 35,
+              "sustain": 0.38,
+              "release_ms": 55
+            }
+          },
+          {
+            "id": "40000000-0000-4000-8000-000000000003",
+            "frequency_hz": 880,
+            "start_time_ms": 410,
+            "duration_ms": 130,
+            "adsr": {
+              "attack_ms": 3,
+              "decay_ms": 35,
+              "sustain": 0.38,
+              "release_ms": 55
+            }
+          },
+          {
+            "id": "40000000-0000-4000-8000-000000000004",
+            "frequency_hz": 659.25,
+            "start_time_ms": 610,
+            "duration_ms": 130,
+            "adsr": {
+              "attack_ms": 3,
+              "decay_ms": 35,
+              "sustain": 0.38,
+              "release_ms": 55
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "ui_select.chime.json": {
+    "project": {
+      "version": "2.1.0",
+      "name": "UI Select",
+      "slot_id": "UI_SELECT",
+      "total_duration_ms": 130,
+      "created": "2026-11-07T19:27:30.127543",
+      "modified": "2026-11-07T19:27:30.127548"
+    },
+    "global": {
+      "master_volume": 0.9,
+      "bpm": 120,
+      "snap_enabled": true,
+      "grid_resolution_ms": 25
+    },
+    "layers": [
+      {
+        "layer_id": 1,
+        "name": "Sine 01",
+        "waveform": "SINE",
+        "volume": 0.72,
+        "mute": false,
+        "solo": false,
+        "default_adsr": {
+          "attack_ms": 2,
+          "decay_ms": 12,
+          "sustain": 0.25,
+          "release_ms": 45
+        },
+        "notes": [
+          {
+            "id": "763ff1cb-1a3e-493b-a847-c1a17219600d",
+            "frequency_hz": 1046.5022612023945,
+            "start_time_ms": 0,
+            "duration_ms": 130,
+            "adsr": {
+              "attack_ms": 2,
+              "decay_ms": 12,
+              "sustain": 0.25,
+              "release_ms": 45
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "wake_alarm.chime.json": {
+    "project": {
+      "version": "2.1.0",
+      "name": "Wake Alarm Cue",
+      "slot_id": "WAKE_ALARM",
+      "total_duration_ms": 1930,
+      "created": "2026-11-07T00:00:00",
+      "modified": "2026-11-07T00:00:00"
+    },
+    "global": {
+      "master_volume": 0.85,
+      "bpm": 120,
+      "snap_enabled": true,
+      "grid_resolution_ms": 10
+    },
+    "layers": [
+      {
+        "layer_id": 1,
+        "name": "Alarm Cue",
+        "waveform": "SQUARE",
+        "volume": 0.48,
+        "mute": false,
+        "solo": false,
+        "default_adsr": {
+          "attack_ms": 2,
+          "decay_ms": 45,
+          "sustain": 0.3,
+          "release_ms": 45
+        },
+        "notes": [
+          {
+            "id": "70000000-0000-4000-8000-000000000001",
+            "frequency_hz": 783.99,
+            "start_time_ms": 0,
+            "duration_ms": 160,
+            "adsr": {
+              "attack_ms": 2,
+              "decay_ms": 45,
+              "sustain": 0.3,
+              "release_ms": 45
+            }
+          },
+          {
+            "id": "70000000-0000-4000-8000-000000000002",
+            "frequency_hz": 987.77,
+            "start_time_ms": 250,
+            "duration_ms": 160,
+            "adsr": {
+              "attack_ms": 2,
+              "decay_ms": 45,
+              "sustain": 0.3,
+              "release_ms": 45
+            }
+          },
+          {
+            "id": "70000000-0000-4000-8000-000000000003",
+            "frequency_hz": 783.99,
+            "start_time_ms": 500,
+            "duration_ms": 160,
+            "adsr": {
+              "attack_ms": 2,
+              "decay_ms": 45,
+              "sustain": 0.3,
+              "release_ms": 45
+            }
+          },
+          {
+            "id": "70000000-0000-4000-8000-000000000004",
+            "frequency_hz": 987.77,
+            "start_time_ms": 750,
+            "duration_ms": 160,
+            "adsr": {
+              "attack_ms": 2,
+              "decay_ms": 45,
+              "sustain": 0.3,
+              "release_ms": 45
+            }
+          },
+          {
+            "id": "70000000-0000-4000-8000-000000000005",
+            "frequency_hz": 1046.5,
+            "start_time_ms": 1000,
+            "duration_ms": 180,
+            "adsr": {
+              "attack_ms": 2,
+              "decay_ms": 45,
+              "sustain": 0.3,
+              "release_ms": 45
+            }
+          },
+          {
+            "id": "70000000-0000-4000-8000-000000000006",
+            "frequency_hz": 987.77,
+            "start_time_ms": 1250,
+            "duration_ms": 180,
+            "adsr": {
+              "attack_ms": 2,
+              "decay_ms": 45,
+              "sustain": 0.3,
+              "release_ms": 45
+            }
+          },
+          {
+            "id": "70000000-0000-4000-8000-000000000007",
+            "frequency_hz": 783.99,
+            "start_time_ms": 1500,
+            "duration_ms": 180,
+            "adsr": {
+              "attack_ms": 2,
+              "decay_ms": 45,
+              "sustain": 0.3,
+              "release_ms": 45
+            }
+          },
+          {
+            "id": "70000000-0000-4000-8000-000000000008",
+            "frequency_hz": 659.25,
+            "start_time_ms": 1750,
+            "duration_ms": 180,
+            "adsr": {
+              "attack_ms": 2,
+              "decay_ms": 45,
+              "sustain": 0.3,
+              "release_ms": 45
+            }
+          }
+        ]
+      }
+    ]
+  }
+};
+
+    // Constants & Colors
+    const WAVEFORMS = [
+      { id: 0, key: "SINE", label: "Sine", color: "#00f0ff" },
+      { id: 1, key: "SQUARE", label: "Square", color: "#ffb020" },
+      { id: 2, key: "TRIANGLE", label: "Triangle", color: "#00e5a3" },
+      { id: 3, key: "SAWTOOTH", label: "Sawtooth", color: "#ff763b" },
+      { id: 4, key: "NOISE", label: "Noise", color: "#a855f7" }
+    ];
+
+    const PITCH_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const MIN_MIDI = 24;  // C1 (32.7 Hz)
+    const MAX_MIDI = 108; // C8 (4186 Hz)
+    const TOTAL_KEYS = MAX_MIDI - MIN_MIDI + 1;
+
+    function midiToFreq(midi) {
+      return 440.0 * Math.pow(2.0, (midi - 69) / 12.0);
+    }
+
+    function freqToMidi(freq) {
+      return Math.round(69 + 12 * Math.log2(freq / 440.0));
+    }
+
+    function midiToName(midi) {
+      const octave = Math.floor(midi / 12) - 1;
+      const noteName = PITCH_NAMES[midi % 12];
+      return noteName + octave;
+    }
+
+    function isBlackKey(midi) {
+      const pc = midi % 12;
+      return pc === 1 || pc === 3 || pc === 6 || pc === 8 || pc === 10;
+    }
+
+    // State Model
+    class ProjectState {
+      constructor() {
+        this.name = "Boot Success";
+        this.slot_id = "BOOT_SUCCESS";
+        this.master_volume = 0.8;
+        this.bpm = 120;
+        this.snap_ms = 25;
+        this.layers = [
+          {
+            layer_id: 1,
+            name: "Melody 01",
+            waveform: 2, // Triangle
+            volume: 0.8,
+            mute: false,
+            solo: false,
+            adsr: { attack_ms: 10, decay_ms: 50, sustain: 0.7, release_ms: 100 },
+            notes: [
+              { id: "n1", frequency_hz: midiToFreq(60), start_time_ms: 0, duration_ms: 150 },
+              { id: "n2", frequency_hz: midiToFreq(64), start_time_ms: 150, duration_ms: 150 },
+              { id: "n3", frequency_hz: midiToFreq(67), start_time_ms: 300, duration_ms: 350 }
+            ]
+          }
+        ];
+        this.activeLayerIndex = 0;
+        this.selectedNote = null;
+      }
+
+      get totalDurationMs() {
+        let maxMs = 0;
+        for (const layer of this.layers) {
+          for (const n of layer.notes) {
+            maxMs = Math.max(maxMs, n.start_time_ms + n.duration_ms);
+          }
+        }
+        return Math.max(500, maxMs);
+      }
+
+      get totalNotesCount() {
+        return this.layers.reduce((acc, l) => acc + l.notes.length, 0);
+      }
+    }
+
+    const project = new ProjectState();
+
+    // Piano Roll Canvas View State
+    const view = {
+      keyWidth: 54,
+      rulerHeight: 26,
+      rowHeight: 18,
+      pixelsPerMs: 0.35, // 1000ms = 350px
+      scrollX: 0,        // in ms
+      scrollY: (MAX_MIDI - 72) * 18, // centered around C4
+      isDragging: false,
+      isResizing: false,
+      dragTarget: null,
+      dragStartX: 0,
+      dragStartY: 0,
+      origStartMs: 0,
+      origDurationMs: 0,
+      origMidi: 60,
+      playheadMs: 0,
+      isPlaying: false
+    };
+
+    // DOM Elements
+    const canvas = document.getElementById("pianoCanvas");
+    const ctx = canvas.getContext("2d");
+    const adsrCanvas = document.getElementById("adsrCanvas");
+    const adsrCtx = adsrCanvas.getContext("2d");
+
+    // Initialize Canvas Sizes
+    function resizeCanvases() {
+      const container = document.getElementById("pianoRollContainer");
+      canvas.width = container.clientWidth * window.devicePixelRatio;
+      canvas.height = container.clientHeight * window.devicePixelRatio;
+      canvas.style.width = container.clientWidth + "px";
+      canvas.style.height = container.clientHeight + "px";
+
+      adsrCanvas.width = adsrCanvas.clientWidth * window.devicePixelRatio;
+      adsrCanvas.height = adsrCanvas.clientHeight * window.devicePixelRatio;
+      render();
+      drawAdsrCurve();
+    }
+    window.addEventListener("resize", resizeCanvases);
+
+    // Snap helper
+    function snapMs(ms) {
+      if (project.snap_ms <= 0) return Math.round(ms);
+      return Math.round(ms / project.snap_ms) * project.snap_ms;
+    }
+
+    // Coordinate conversion
+    function timeToX(ms) {
+      return view.keyWidth + (ms - view.scrollX) * view.pixelsPerMs;
+    }
+
+    function xToTime(x) {
+      return view.scrollX + (x - view.keyWidth) / view.pixelsPerMs;
+    }
+
+    function midiToY(midi) {
+      return view.rulerHeight + (MAX_MIDI - midi) * view.rowHeight - view.scrollY;
+    }
+
+    function yToMidi(y) {
+      const relY = y - view.rulerHeight + view.scrollY;
+      return MAX_MIDI - Math.floor(relY / view.rowHeight);
+    }
+
+    // Web Audio Engine
+    let audioCtx = null;
+    let activeOscillators = [];
+    let playbackStartTime = 0;
+    let playbackRafId = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playNotePreview(freq, waveId, adsr, durMs = 250) {
+      const ctx = getAudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      const waveType = WAVEFORMS[waveId] ? WAVEFORMS[waveId].key.toLowerCase() : "sine";
+      if (waveType === "noise") {
+        // Noise buffer
+        const bufSize = ctx.sampleRate * 0.5;
+        const noiseBuf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+        const data = noiseBuf.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+        const noiseNode = ctx.createBufferSource();
+        noiseNode.buffer = noiseBuf;
+        noiseNode.connect(gain);
+        gain.connect(ctx.destination);
+        const now = ctx.currentTime;
+        gain.gain.setValueAtTime(0.5, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + durMs / 1000);
+        noiseNode.start(now);
+        noiseNode.stop(now + durMs / 1000);
+        return;
+      }
+
+      osc.type = waveType;
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+      const now = ctx.currentTime;
+      const tAttack = adsr.attack_ms / 1000;
+      const tDecay = adsr.decay_ms / 1000;
+      const tRelease = adsr.release_ms / 1000;
+      const sustainVal = adsr.sustain;
+
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.7, now + tAttack);
+      gain.gain.linearRampToValueAtTime(0.7 * sustainVal, now + tAttack + tDecay);
+      gain.gain.setValueAtTime(0.7 * sustainVal, now + durMs / 1000);
+      gain.gain.linearRampToValueAtTime(0.0001, now + durMs / 1000 + tRelease);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + durMs / 1000 + tRelease);
+    }
+
+    function startPlayback() {
+      const ctx = getAudioContext();
+      stopPlayback();
+
+      view.isPlaying = true;
+      document.getElementById("playIcon").textContent = "⏸";
+      document.getElementById("playText").textContent = "Pause";
+
+      const hasSolo = project.layers.some(l => l.solo);
+      const activeLayers = project.layers.filter(l => hasSolo ? l.solo : !l.mute);
+      const now = ctx.currentTime;
+      playbackStartTime = performance.now();
+
+      for (const layer of activeLayers) {
+        const adsr = layer.adsr;
+        const waveKey = WAVEFORMS[layer.waveform].key.toLowerCase();
+
+        for (const note of layer.notes) {
+          const tStart = now + (note.start_time_ms / 1000);
+          const tDur = note.duration_ms / 1000;
+          const tAttack = adsr.attack_ms / 1000;
+          const tDecay = adsr.decay_ms / 1000;
+          const tRelease = adsr.release_ms / 1000;
+          const peakVol = layer.volume * project.master_volume;
+          const susVol = peakVol * adsr.sustain;
+
+          const gain = ctx.createGain();
+          gain.gain.setValueAtTime(0, tStart);
+          gain.gain.linearRampToValueAtTime(peakVol, tStart + tAttack);
+          gain.gain.linearRampToValueAtTime(susVol, tStart + tAttack + tDecay);
+          gain.gain.setValueAtTime(susVol, tStart + tDur);
+          gain.gain.linearRampToValueAtTime(0.0001, tStart + tDur + tRelease);
+          gain.connect(ctx.destination);
+
+          if (waveKey === "noise") {
+            const bufSize = Math.max(1, Math.round(ctx.sampleRate * (tDur + tRelease)));
+            const noiseBuf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+            const data = noiseBuf.getChannelData(0);
+            for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+            const noiseNode = ctx.createBufferSource();
+            noiseNode.buffer = noiseBuf;
+            noiseNode.connect(gain);
+            noiseNode.start(tStart);
+            noiseNode.stop(tStart + tDur + tRelease);
+            activeOscillators.push(noiseNode);
+          } else {
+            const osc = ctx.createOscillator();
+            osc.type = waveKey;
+            osc.frequency.setValueAtTime(note.frequency_hz, tStart);
+            osc.connect(gain);
+            osc.start(tStart);
+            osc.stop(tStart + tDur + tRelease);
+            activeOscillators.push(osc);
+          }
+        }
+      }
+
+      // Playhead animation loop
+      function updatePlayhead() {
+        if (!view.isPlaying) return;
+        const elapsedMs = performance.now() - playbackStartTime;
+        view.playheadMs = elapsedMs;
+        document.getElementById("statPlayhead").textContent = Math.round(elapsedMs) + " ms";
+
+        if (elapsedMs > project.totalDurationMs + 200) {
+          stopPlayback();
+          return;
+        }
+        render();
+        playbackRafId = requestAnimationFrame(updatePlayhead);
+      }
+      playbackRafId = requestAnimationFrame(updatePlayhead);
+    }
+
+    function stopPlayback() {
+      view.isPlaying = false;
+      document.getElementById("playIcon").textContent = "▶";
+      document.getElementById("playText").textContent = "Play";
+      if (playbackRafId) cancelAnimationFrame(playbackRafId);
+      for (const node of activeOscillators) {
+        try { node.stop(); node.disconnect(); } catch(e) {}
+      }
+      activeOscillators = [];
+      view.playheadMs = 0;
+      document.getElementById("statPlayhead").textContent = "0 ms";
+      render();
+    }
+
+    // Render Main Piano Roll
+    function render() {
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.width / dpr;
+      const h = canvas.height / dpr;
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, w, h);
+
+      // Background grid
+      ctx.fillStyle = "#090d16";
+      ctx.fillRect(view.keyWidth, view.rulerHeight, w - view.keyWidth, h - view.rulerHeight);
+
+      // Draw Key Lanes
+      const startMidi = yToMidi(h);
+      const endMidi = yToMidi(view.rulerHeight);
+
+      for (let m = startMidi; m <= endMidi; m++) {
+        if (m < MIN_MIDI || m > MAX_MIDI) continue;
+        const y = midiToY(m);
+        const black = isBlackKey(m);
+
+        // Grid Lane
+        ctx.fillStyle = black ? "#0c121e" : "#101828";
+        ctx.fillRect(view.keyWidth, y, w - view.keyWidth, view.rowHeight);
+
+        // Divider
+        ctx.strokeStyle = "#162238";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(view.keyWidth, y + view.rowHeight);
+        ctx.lineTo(w, y + view.rowHeight);
+        ctx.stroke();
+      }
+
+      // Vertical Time Grid Lines
+      const startTimeMs = Math.max(0, xToTime(view.keyWidth));
+      const endTimeMs = xToTime(w);
+      const snap = project.snap_ms > 0 ? project.snap_ms : 50;
+      const beatMs = (60 / project.bpm) * 1000;
+
+      const firstGridMs = Math.floor(startTimeMs / snap) * snap;
+      for (let t = firstGridMs; t <= endTimeMs; t += snap) {
+        const x = timeToX(t);
+        const isBeat = Math.abs(t % beatMs) < snap / 2;
+
+        ctx.strokeStyle = isBeat ? "rgba(0, 240, 255, 0.25)" : "rgba(255, 255, 255, 0.05)";
+        ctx.lineWidth = isBeat ? 1.5 : 1;
+        ctx.beginPath();
+        ctx.moveTo(x, view.rulerHeight);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+
+      // Draw Notes for all layers
+      project.layers.forEach((layer, lIdx) => {
+        const isCurrent = lIdx === project.activeLayerIndex;
+        const waveColor = WAVEFORMS[layer.waveform].color;
+
+        for (const note of layer.notes) {
+          const midi = freqToMidi(note.frequency_hz);
+          const x = timeToX(note.start_time_ms);
+          const y = midiToY(midi);
+          const noteW = Math.max(8, note.duration_ms * view.pixelsPerMs);
+          const isSelected = project.selectedNote === note;
+
+          // Note Body
+          ctx.fillStyle = isCurrent ? waveColor : "rgba(100, 116, 139, 0.4)";
+          ctx.beginPath();
+          ctx.roundRect(x, y + 2, noteW, view.rowHeight - 4, 4);
+          ctx.fill();
+
+          // Selection Glow & Border
+          if (isSelected) {
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          } else {
+            ctx.strokeStyle = "rgba(0,0,0,0.5)";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+
+          // Note resize handle pill on right
+          ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+          ctx.fillRect(x + noteW - 4, y + 3, 3, view.rowHeight - 6);
+
+          // Note Label
+          if (noteW > 25) {
+            ctx.fillStyle = isCurrent ? "#080b12" : "#ffffff";
+            ctx.font = "bold 9px " + getComputedStyle(document.body).fontFamily;
+            ctx.fillText(midiToName(midi), x + 5, y + view.rowHeight - 6);
+          }
+        }
+      });
+
+      // Draw Piano Keyboard on Left
+      for (let m = startMidi; m <= endMidi; m++) {
+        if (m < MIN_MIDI || m > MAX_MIDI) continue;
+        const y = midiToY(m);
+        const black = isBlackKey(m);
+
+        ctx.fillStyle = black ? "#121927" : "#e2e8f0";
+        ctx.fillRect(0, y, view.keyWidth, view.rowHeight);
+
+        ctx.strokeStyle = "#080b12";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(0, y, view.keyWidth, view.rowHeight);
+
+        // Key Labels on C notes
+        if (m % 12 === 0) {
+          ctx.fillStyle = "#0f172a";
+          ctx.font = "bold 9px " + getComputedStyle(document.body).fontFamily;
+          ctx.fillText(midiToName(m), 6, y + view.rowHeight - 5);
+        }
+      }
+
+      // Keyboard Separator Line
+      ctx.strokeStyle = "#212d47";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(view.keyWidth, 0);
+      ctx.lineTo(view.keyWidth, h);
+      ctx.stroke();
+
+      // Top Ruler
+      ctx.fillStyle = "#080c14";
+      ctx.fillRect(0, 0, w, view.rulerHeight);
+      ctx.strokeStyle = "#212d47";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0, 0, w, view.rulerHeight);
+
+      // Ruler ticks & ms labels
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "10px " + getComputedStyle(document.body).fontFamily;
+      for (let t = firstGridMs; t <= endTimeMs; t += snap * 4) {
+        const rx = timeToX(t);
+        ctx.strokeStyle = "#475569";
+        ctx.beginPath();
+        ctx.moveTo(rx, view.rulerHeight - 8);
+        ctx.lineTo(rx, view.rulerHeight);
+        ctx.stroke();
+
+        ctx.fillText(t + "ms", rx + 4, view.rulerHeight - 6);
+      }
+
+      // Playhead Line
+      if (view.playheadMs > 0) {
+        const px = timeToX(view.playheadMs);
+        if (px >= view.keyWidth && px <= w) {
+          ctx.strokeStyle = "#00f0ff";
+          ctx.lineWidth = 2;
+          ctx.shadowColor = "#00f0ff";
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.moveTo(px, 0);
+          ctx.lineTo(px, h);
+          ctx.stroke();
+          ctx.shadowBlur = 0; // reset
+        }
+      }
+
+      ctx.restore();
+      updateFooterStats();
+    }
+
+    // Draw ADSR Visual Curve
+    function drawAdsrCurve() {
+      const dpr = window.devicePixelRatio || 1;
+      const w = adsrCanvas.width / dpr;
+      const h = adsrCanvas.height / dpr;
+
+      adsrCtx.save();
+      adsrCtx.scale(dpr, dpr);
+      adsrCtx.clearRect(0, 0, w, h);
+
+      const layer = project.layers[project.activeLayerIndex];
+      if (!layer) { adsrCtx.restore(); return; }
+      const a = layer.adsr;
+
+      const totalTime = Math.max(300, a.attack_ms + a.decay_ms + 100 + a.release_ms);
+      const padX = 14;
+      const padY = 12;
+      const innerW = w - padX * 2;
+      const innerH = h - padY * 2;
+
+      const x0 = padX;
+      const y0 = h - padY;
+      const xA = x0 + (a.attack_ms / totalTime) * innerW;
+      const yA = padY;
+      const xD = xA + (a.decay_ms / totalTime) * innerW;
+      const yD = padY + (1.0 - a.sustain) * innerH;
+      const xS = xD + (100 / totalTime) * innerW; // hold sustain
+      const yS = yD;
+      const xR = xS + (a.release_ms / totalTime) * innerW;
+      const yR = y0;
+
+      // Fill area under curve
+      const grad = adsrCtx.createLinearGradient(0, padY, 0, h - padY);
+      grad.addColorStop(0, "rgba(0, 229, 163, 0.4)");
+      grad.addColorStop(1, "rgba(0, 229, 163, 0.02)");
+
+      adsrCtx.fillStyle = grad;
+      adsrCtx.beginPath();
+      adsrCtx.moveTo(x0, y0);
+      adsrCtx.lineTo(xA, yA);
+      adsrCtx.lineTo(xD, yD);
+      adsrCtx.lineTo(xS, yS);
+      adsrCtx.lineTo(xR, yR);
+      adsrCtx.closePath();
+      adsrCtx.fill();
+
+      // Stroke curve
+      adsrCtx.strokeStyle = "#00e5a3";
+      adsrCtx.lineWidth = 2.5;
+      adsrCtx.beginPath();
+      adsrCtx.moveTo(x0, y0);
+      adsrCtx.lineTo(xA, yA);
+      adsrCtx.lineTo(xD, yD);
+      adsrCtx.lineTo(xS, yS);
+      adsrCtx.lineTo(xR, yR);
+      adsrCtx.stroke();
+
+      // Control points
+      const points = [[xA, yA], [xD, yD], [xS, yS], [xR, yR]];
+      adsrCtx.fillStyle = "#ffffff";
+      for (const [px, py] of points) {
+        adsrCtx.beginPath();
+        adsrCtx.arc(px, py, 3.5, 0, Math.PI * 2);
+        adsrCtx.fill();
+      }
+
+      adsrCtx.restore();
+    }
+
+    // Mouse Interaction on Piano Roll
+    function getCanvasPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    }
+
+    function findNoteAt(x, y) {
+      const timeMs = xToTime(x);
+      const midi = yToMidi(y);
+
+      for (let i = project.layers.length - 1; i >= 0; i--) {
+        const layer = project.layers[i];
+        for (const note of layer.notes) {
+          const noteMidi = freqToMidi(note.frequency_hz);
+          if (noteMidi === midi && timeMs >= note.start_time_ms && timeMs <= (note.start_time_ms + note.duration_ms)) {
+            const isHandle = (timeMs >= note.start_time_ms + note.duration_ms - 25);
+            return { note, layer, layerIndex: i, isHandle };
+          }
+        }
+      }
+      return null;
+    }
+
+    canvas.addEventListener("mousedown", (e) => {
+      const pos = getCanvasPos(e);
+
+      // Check Piano Keys Click
+      if (pos.x < view.keyWidth && pos.y >= view.rulerHeight) {
+        const midi = yToMidi(pos.y);
+        if (midi >= MIN_MIDI && midi <= MAX_MIDI) {
+          const curLayer = project.layers[project.activeLayerIndex];
+          playNotePreview(midiToFreq(midi), curLayer.waveform, curLayer.adsr);
+        }
+        return;
+      }
+
+      // Check Ruler Click (Seek)
+      if (pos.y < view.rulerHeight) {
+        const seekTime = Math.max(0, snapMs(xToTime(pos.x)));
+        view.playheadMs = seekTime;
+        render();
+        return;
+      }
+
+      // Grid Notes Interaction
+      const match = findNoteAt(pos.x, pos.y);
+      if (match) {
+        project.selectedNote = match.note;
+        project.activeLayerIndex = match.layerIndex;
+        updateLayersList();
+        updateInspector();
+
+        view.isDragging = !match.isHandle;
+        view.isResizing = match.isHandle;
+        view.dragTarget = match.note;
+        view.dragStartX = pos.x;
+        view.dragStartY = pos.y;
+        view.origStartMs = match.note.start_time_ms;
+        view.origDurationMs = match.note.duration_ms;
+        view.origMidi = freqToMidi(match.note.frequency_hz);
+        render();
+        return;
+      }
+
+      // Empty Grid Click -> Create New Note in Active Layer
+      if (e.button === 0 && pos.x >= view.keyWidth && pos.y >= view.rulerHeight) {
+        const activeLayer = project.layers[project.activeLayerIndex];
+        if (activeLayer.notes.length >= 32) {
+          alert("Firmware limit reached: Max 32 notes per layer!");
+          return;
+        }
+        const newStartMs = Math.max(0, snapMs(xToTime(pos.x)));
+        const midi = yToMidi(pos.y);
+        const freq = midiToFreq(midi);
+        const defaultDur = project.snap_ms > 0 ? project.snap_ms * 4 : 150;
+
+        const newNote = {
+          id: "n_" + Date.now(),
+          frequency_hz: freq,
+          start_time_ms: newStartMs,
+          duration_ms: defaultDur
+        };
+
+        activeLayer.notes.push(newNote);
+        project.selectedNote = newNote;
+        updateInspector();
+        playNotePreview(freq, activeLayer.waveform, activeLayer.adsr, defaultDur);
+        render();
+      }
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      const pos = getCanvasPos(e);
+
+      // Cursor update
+      if (!view.isDragging && !view.isResizing) {
+        if (pos.x < view.keyWidth) {
+          canvas.style.cursor = "pointer";
+        } else {
+          const match = findNoteAt(pos.x, pos.y);
+          if (match) {
+            canvas.style.cursor = match.isHandle ? "ew-resize" : "grab";
+          } else {
+            canvas.style.cursor = "crosshair";
+          }
+        }
+        return;
+      }
+
+      // Note Dragging (Move Time & Pitch)
+      if (view.isDragging && view.dragTarget) {
+        const deltaMs = (pos.x - view.dragStartX) / view.pixelsPerMs;
+        const newStart = Math.max(0, snapMs(view.origStartMs + deltaMs));
+        view.dragTarget.start_time_ms = newStart;
+
+        const newMidi = yToMidi(pos.y);
+        if (newMidi >= MIN_MIDI && newMidi <= MAX_MIDI) {
+          view.dragTarget.frequency_hz = midiToFreq(newMidi);
+        }
+        updateInspector();
+        render();
+      }
+
+      // Note Resizing (Change Duration)
+      if (view.isResizing && view.dragTarget) {
+        const deltaMs = (pos.x - view.dragStartX) / view.pixelsPerMs;
+        const newDur = Math.max(10, snapMs(view.origDurationMs + deltaMs));
+        view.dragTarget.duration_ms = newDur;
+        updateInspector();
+        render();
+      }
+    });
+
+    window.addEventListener("mouseup", () => {
+      if (view.isDragging || view.isResizing) {
+        view.isDragging = false;
+        view.isResizing = false;
+        view.dragTarget = null;
+        updateCPreview();
+        render();
+      }
+    });
+
+    // Keyboard Shortcuts
+    window.addEventListener("keydown", (e) => {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+
+      if (e.code === "Space") {
+        e.preventDefault();
+        view.isPlaying ? stopPlayback() : startPlayback();
+      } else if (e.code === "Delete" || e.code === "Backspace") {
+        if (project.selectedNote) {
+          e.preventDefault();
+          deleteSelectedNote();
+        }
+      }
+    });
+
+    // Delete selected note
+    function deleteSelectedNote() {
+      if (!project.selectedNote) return;
+      const curLayer = project.layers[project.activeLayerIndex];
+      curLayer.notes = curLayer.notes.filter(n => n !== project.selectedNote);
+      project.selectedNote = null;
+      updateInspector();
+      updateCPreview();
+      render();
+    }
+    document.getElementById("btnDeleteNote").addEventListener("click", deleteSelectedNote);
+
+    // Inspector UI Sync
+    function updateInspector() {
+      const n = project.selectedNote;
+      const delBtn = document.getElementById("btnDeleteNote");
+      if (n) {
+        const midi = freqToMidi(n.frequency_hz);
+        document.getElementById("inspPitch").textContent = midiToName(midi);
+        document.getElementById("inspMidi").textContent = "MIDI " + midi;
+        document.getElementById("inspFreq").textContent = n.frequency_hz.toFixed(1);
+        document.getElementById("inspStart").textContent = n.start_time_ms;
+        document.getElementById("inspDuration").textContent = n.duration_ms;
+        delBtn.disabled = false;
+      } else {
+        document.getElementById("inspPitch").textContent = "-";
+        document.getElementById("inspMidi").textContent = "-";
+        document.getElementById("inspFreq").textContent = "-";
+        document.getElementById("inspStart").textContent = "-";
+        document.getElementById("inspDuration").textContent = "-";
+        delBtn.disabled = true;
+      }
+
+      const layer = project.layers[project.activeLayerIndex];
+      if (layer) {
+        const a = layer.adsr;
+        document.getElementById("rngAttack").value = a.attack_ms;
+        document.getElementById("rngDecay").value = a.decay_ms;
+        document.getElementById("rngSustain").value = a.sustain;
+        document.getElementById("rngRelease").value = a.release_ms;
+
+        document.getElementById("txtAttack").textContent = a.attack_ms + "ms";
+        document.getElementById("txtDecay").textContent = a.decay_ms + "ms";
+        document.getElementById("txtSustain").textContent = Math.round(a.sustain * 100) + "%";
+        document.getElementById("txtRelease").textContent = a.release_ms + "ms";
+
+        document.getElementById("adsrSummary").textContent = 
+          `A:${a.attack_ms}ms D:${a.decay_ms}ms S:${Math.round(a.sustain * 100)}% R:${a.release_ms}ms`;
+        drawAdsrCurve();
+      }
+    }
+
+    // ADSR Slider Listeners
+    ["Attack", "Decay", "Sustain", "Release"].forEach(param => {
+      const slider = document.getElementById("rng" + param);
+      slider.addEventListener("input", (e) => {
+        const layer = project.layers[project.activeLayerIndex];
+        if (!layer) return;
+        const val = parseFloat(e.target.value);
+        if (param === "Attack") layer.adsr.attack_ms = val;
+        if (param === "Decay") layer.adsr.decay_ms = val;
+        if (param === "Sustain") layer.adsr.sustain = val;
+        if (param === "Release") layer.adsr.release_ms = val;
+        updateInspector();
+        updateCPreview();
+      });
+    });
+
+    // Layers List UI
+    function updateLayersList() {
+      const container = document.getElementById("tracksList");
+      container.innerHTML = "";
+      document.getElementById("layerCountText").textContent = project.layers.length;
+      document.getElementById("btnAddLayer").disabled = project.layers.length >= 8;
+
+      project.layers.forEach((layer, idx) => {
+        const card = document.createElement("div");
+        card.className = "track-card" + (idx === project.activeLayerIndex ? " active" : "");
+        const waveInfo = WAVEFORMS[layer.waveform];
+
+        card.innerHTML = `
+          <div class="track-title-row">
+            <div class="track-name-box">
+              <div class="track-color-pill" style="background: ${waveInfo.color};"></div>
+              <span class="track-name">${layer.name}</span>
+            </div>
+            <div class="track-ctrls">
+              <button class="btn-toggle ${layer.mute ? 'active-mute' : ''}" title="Mute" data-action="mute">M</button>
+              <button class="btn-toggle ${layer.solo ? 'active-solo' : ''}" title="Solo" data-action="solo">S</button>
+              ${project.layers.length > 1 ? '<button class="btn-toggle" title="Delete" data-action="del" style="color:var(--accent-crimson);">✕</button>' : ''}
+            </div>
+          </div>
+          <div class="track-row-params">
+            <select data-action="wave" style="font-size: 11px; padding: 2px 4px;">
+              ${WAVEFORMS.map(w => `<option value="${w.id}" ${w.id === layer.waveform ? 'selected' : ''}>${w.label}</option>`).join('')}
+            </select>
+            <div style="display:flex; align-items:center; gap:4px;">
+              <input type="range" data-action="vol" min="0" max="1" step="0.05" value="${layer.volume}" style="width:55px;">
+              <span style="font-size:10px; font-family:var(--font-mono); width:28px;">${Math.round(layer.volume * 100)}%</span>
+            </div>
+          </div>
+          <div style="font-size: 10px; color: var(--text-muted); display:flex; justify-content:space-between;">
+            <span>${layer.notes.length} / 32 Notes</span>
+            <span style="color: ${waveInfo.color};">${waveInfo.label}</span>
+          </div>
+        `;
+
+        card.addEventListener("click", (e) => {
+          if (e.target.dataset.action) return; // handled separately
+          project.activeLayerIndex = idx;
+          updateLayersList();
+          updateInspector();
+          render();
+        });
+
+        // Mute / Solo / Wave / Vol handlers
+        const muteBtn = card.querySelector('[data-action="mute"]');
+        muteBtn.addEventListener("click", () => {
+          layer.mute = !layer.mute;
+          updateLayersList();
+          render();
+        });
+
+        const soloBtn = card.querySelector('[data-action="solo"]');
+        soloBtn.addEventListener("click", () => {
+          layer.solo = !layer.solo;
+          updateLayersList();
+          render();
+        });
+
+        const delBtn = card.querySelector('[data-action="del"]');
+        if (delBtn) {
+          delBtn.addEventListener("click", () => {
+            project.layers.splice(idx, 1);
+            project.activeLayerIndex = Math.max(0, idx - 1);
+            project.selectedNote = null;
+            updateLayersList();
+            updateInspector();
+            updateCPreview();
+            render();
+          });
+        }
+
+        const waveSel = card.querySelector('[data-action="wave"]');
+        waveSel.addEventListener("change", (e) => {
+          layer.waveform = parseInt(e.target.value);
+          updateLayersList();
+          updateCPreview();
+          render();
+        });
+
+        const volRng = card.querySelector('[data-action="vol"]');
+        volRng.addEventListener("input", (e) => {
+          layer.volume = parseFloat(e.target.value);
+          updateLayersList();
+          updateCPreview();
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    // Add Layer Button
+    document.getElementById("btnAddLayer").addEventListener("click", () => {
+      if (project.layers.length >= 8) return;
+      const newId = project.layers.length + 1;
+      project.layers.push({
+        layer_id: newId,
+        name: "Layer 0" + newId,
+        waveform: (newId - 1) % 5,
+        volume: 0.8,
+        mute: false,
+        solo: false,
+        adsr: { attack_ms: 10, decay_ms: 50, sustain: 0.7, release_ms: 100 },
+        notes: []
+      });
+      project.activeLayerIndex = project.layers.length - 1;
+      updateLayersList();
+      updateInspector();
+      updateCPreview();
+      render();
+    });
+
+    // Populate Presets Dropdown
+    const selPresets = document.getElementById("selPresets");
+    for (const [key, val] of Object.entries(BUNDLED_PRESETS)) {
+      const opt = document.createElement("option");
+      opt.value = key;
+      opt.textContent = val.project ? val.project.name : key;
+      selPresets.appendChild(opt);
+    }
+
+    selPresets.addEventListener("change", (e) => {
+      const key = e.target.value;
+      if (!key || !BUNDLED_PRESETS[key]) return;
+      loadProjectFromObject(BUNDLED_PRESETS[key]);
+    });
+
+    function loadProjectFromObject(data) {
+      const p = data.project || {};
+      const g = data.global || {};
+
+      project.name = p.name || "Untitled";
+      project.slot_id = p.slot_id || "SLOT_01";
+      document.getElementById("txtProjectName").value = project.name;
+      document.getElementById("txtSlotId").value = project.slot_id;
+
+      project.master_volume = g.master_volume !== undefined ? g.master_volume : 0.8;
+      project.bpm = g.bpm || 120;
+      project.snap_ms = g.grid_resolution_ms !== undefined ? g.grid_resolution_ms : 25;
+
+      document.getElementById("numBpm").value = project.bpm;
+      document.getElementById("rngMasterVol").value = project.master_volume;
+      document.getElementById("txtMasterVol").textContent = Math.round(project.master_volume * 100) + "%";
+
+      const snapSel = document.getElementById("selSnap");
+      for (const opt of snapSel.options) {
+        if (parseInt(opt.value) === project.snap_ms) opt.selected = true;
+      }
+
+      // Waveform key to ID mapping
+      const waveMap = { "SINE": 0, "SQUARE": 1, "TRIANGLE": 2, "SAWTOOTH": 3, "NOISE": 4 };
+
+      project.layers = (data.layers || []).map((l, idx) => {
+        const waveId = typeof l.waveform === "string" ? (waveMap[l.waveform] || 0) : (l.waveform || 0);
+        const adsr = l.default_adsr || { attack_ms: 10, decay_ms: 50, sustain: 0.7, release_ms: 100 };
+        return {
+          layer_id: l.layer_id || (idx + 1),
+          name: l.name || "Layer " + (idx + 1),
+          waveform: waveId,
+          volume: l.volume !== undefined ? l.volume : 0.8,
+          mute: !!l.mute,
+          solo: !!l.solo,
+          adsr: {
+            attack_ms: adsr.attack_ms || 10,
+            decay_ms: adsr.decay_ms || 50,
+            sustain: adsr.sustain || 0.7,
+            release_ms: adsr.release_ms || 100
+          },
+          notes: (l.notes || []).map(n => ({
+            id: n.id || "n_" + Math.random(),
+            frequency_hz: n.frequency_hz,
+            start_time_ms: Math.round(n.start_time_ms),
+            duration_ms: Math.round(n.duration_ms)
+          }))
+        };
+      });
+
+      if (project.layers.length === 0) {
+        project.layers.push({
+          layer_id: 1,
+          name: "Layer 01",
+          waveform: 0,
+          volume: 0.8,
+          mute: false,
+          solo: false,
+          adsr: { attack_ms: 10, decay_ms: 50, sustain: 0.7, release_ms: 100 },
+          notes: []
+        });
+      }
+
+      project.activeLayerIndex = 0;
+      project.selectedNote = null;
+      updateLayersList();
+      updateInspector();
+      updateCPreview();
+      render();
+    }
+
+    // Footer stats update & firmware limits check
+    function updateFooterStats() {
+      const dur = project.totalDurationMs;
+      document.getElementById("statDuration").textContent = dur + " ms";
+      document.getElementById("statNotes").textContent = project.totalNotesCount;
+      document.getElementById("statLayers").textContent = project.layers.length;
+
+      const statLimits = document.getElementById("statLimits");
+      const errs = [];
+      if (project.layers.length > 8) errs.push("Max 8 layers exceeded!");
+      for (const l of project.layers) {
+        if (l.notes.length > 32) errs.push(`${l.name} exceeds 32 notes!`);
+      }
+      if (dur > 268435) errs.push("Max duration (268s) exceeded!");
+
+      if (errs.length > 0) {
+        statLimits.style.color = "var(--accent-crimson)";
+        statLimits.textContent = "⚠ " + errs.join(" | ");
+      } else {
+        statLimits.style.color = "var(--accent-mint)";
+        statLimits.textContent = "✔ All parameters within ESP-IDF firmware limits";
+      }
+    }
+
+    // C Code Generator
+    function updateCPreview() {
+      const slot = (document.getElementById("txtSlotId").value || "SOUND_CHIME").toUpperCase();
+      const codeBox = document.getElementById("codePreview");
+
+      let c = `/* Generated by ESP32 System Chimes Web Studio */\n`;
+      c += `#include "system_chimes.h"\n\n`;
+      c += `static const chime_sound_t chime_${slot.toLowerCase()} = {\n`;
+      c += `    .slot_id = "${slot}",\n`;
+      c += `    .total_duration_ms = ${project.totalDurationMs},\n`;
+      c += `    .layer_count = ${project.layers.length},\n`;
+      c += `    .layers = {\n`;
+
+      const waveEnum = ["CHIME_WAVE_SINE", "CHIME_WAVE_SQUARE", "CHIME_WAVE_TRIANGLE", "CHIME_WAVE_SAWTOOTH", "CHIME_WAVE_NOISE"];
+
+      project.layers.forEach((l, lIdx) => {
+        c += `        [${lIdx}] = {\n`;
+        c += `            .waveform = ${waveEnum[l.waveform]},\n`;
+        c += `            .volume = ${l.volume.toFixed(2)}f,\n`;
+        c += `            .adsr = {\n`;
+        c += `                .attack_ms = ${Math.round(l.adsr.attack_ms)}, .decay_ms = ${Math.round(l.adsr.decay_ms)},\n`;
+        c += `                .sustain_level = ${l.adsr.sustain.toFixed(2)}f, .release_ms = ${Math.round(l.adsr.release_ms)}\n`;
+        c += `            },\n`;
+        c += `            .note_count = ${l.notes.length},\n`;
+        c += `            .notes = {\n`;
+
+        l.notes.forEach((n, nIdx) => {
+          c += `                [${nIdx}] = { .start_time_ms = ${n.start_time_ms}, .duration_ms = ${n.duration_ms}, .frequency_hz = ${n.frequency_hz.toFixed(1)}f },\n`;
+        });
+
+        c += `            }\n`;
+        c += `        },\n`;
+      });
+
+      c += `    }\n`;
+      c += `};\n`;
+      codeBox.textContent = c;
+    }
+
+    document.getElementById("btnCopyCode").addEventListener("click", () => {
+      navigator.clipboard.writeText(document.getElementById("codePreview").textContent);
+      const btn = document.getElementById("btnCopyCode");
+      btn.textContent = "✔ Copied!";
+      setTimeout(() => btn.textContent = "📋 Copy C Code", 1500);
+    });
+
+    // Export & Import JSON
+    document.getElementById("btnExport").addEventListener("click", () => {
+      const waveNames = ["SINE", "SQUARE", "TRIANGLE", "SAWTOOTH", "NOISE"];
+      const obj = {
+        project: {
+          version: "2.1.0",
+          name: document.getElementById("txtProjectName").value,
+          slot_id: document.getElementById("txtSlotId").value.toUpperCase(),
+          total_duration_ms: project.totalDurationMs,
+          created: new Date().toISOString(),
+          modified: new Date().toISOString()
+        },
+        global: {
+          master_volume: project.master_volume,
+          bpm: project.bpm,
+          snap_enabled: project.snap_ms > 0,
+          grid_resolution_ms: project.snap_ms
+        },
+        layers: project.layers.map(l => ({
+          layer_id: l.layer_id,
+          name: l.name,
+          waveform: waveNames[l.waveform],
+          volume: l.volume,
+          mute: l.mute,
+          solo: l.solo,
+          default_adsr: {
+            attack_ms: l.adsr.attack_ms,
+            decay_ms: l.adsr.decay_ms,
+            sustain: l.adsr.sustain,
+            release_ms: l.adsr.release_ms
+          },
+          notes: l.notes.map(n => ({
+            id: n.id,
+            frequency_hz: n.frequency_hz,
+            start_time_ms: n.start_time_ms,
+            duration_ms: n.duration_ms,
+            adsr: l.adsr
+          }))
+        }))
+      };
+
+      const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = (obj.project.slot_id.toLowerCase() || "chime") + ".chime.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById("btnImport").addEventListener("click", () => {
+      document.getElementById("fileInput").click();
+    });
+
+    document.getElementById("fileInput").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const data = JSON.parse(evt.target.result);
+          loadProjectFromObject(data);
+        } catch(err) {
+          alert("Error parsing JSON project: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    document.getElementById("btnNew").addEventListener("click", () => {
+      if (confirm("Reset current project and start fresh?")) {
+        project.layers = [{
+          layer_id: 1,
+          name: "Layer 01",
+          waveform: 0,
+          volume: 0.8,
+          mute: false,
+          solo: false,
+          adsr: { attack_ms: 10, decay_ms: 50, sustain: 0.7, release_ms: 100 },
+          notes: []
+        }];
+        project.activeLayerIndex = 0;
+        project.selectedNote = null;
+        document.getElementById("txtProjectName").value = "New Sound";
+        document.getElementById("txtSlotId").value = "NEW_SLOT";
+        updateLayersList();
+        updateInspector();
+        updateCPreview();
+        render();
+      }
+    });
+
+    // Tab Navigation
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(btn.dataset.tab).classList.add("active");
+      });
+    });
+
+    // Web Serial Communication Engine
+    let serialPort = null;
+    let serialReader = null;
+    let serialWriter = null;
+    let isConnected = false;
+    let commandQueue = [];
+    let isProcessingCommand = false;
+    let lineBuffer = "";
+
+    function logTerminal(text, type = "info") {
+      const log = document.getElementById("terminalLog");
+      const d = document.createElement("div");
+      d.className = "log-entry log-" + type;
+      d.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+      log.appendChild(d);
+      log.scrollTop = log.scrollHeight;
+    }
+    document.getElementById("btnClearLog").addEventListener("click", () => {
+      document.getElementById("terminalLog").innerHTML = "";
+    });
+
+    function updateBadge(online, text) {
+      const b = document.getElementById("statusBadge");
+      const txt = document.getElementById("badgeText");
+      const connBtn = document.getElementById("txtConnect");
+      if (online) {
+        b.className = "status-badge online";
+        txt.textContent = text || "Online";
+        connBtn.textContent = "Disconnect";
+      } else {
+        b.className = "status-badge";
+        txt.textContent = text || "Offline";
+        connBtn.textContent = "Connect ESP32";
+      }
+    }
+
+    async function sendSerialCommand(cmd) {
+      return new Promise((resolve, reject) => {
+        commandQueue.push({ cmd, resolve, reject });
+        processCommandQueue();
+      });
+    }
+
+    async function processCommandQueue() {
+      if (isProcessingCommand || commandQueue.length === 0 || !serialWriter) return;
+      isProcessingCommand = true;
+      const { cmd, resolve, reject } = commandQueue.shift();
+
+      try {
+        logTerminal("TX >> " + cmd, "tx");
+        const encoder = new TextEncoder();
+        await serialWriter.write(encoder.encode(cmd + "\n"));
+
+        // Wait for response line
+        const timeout = setTimeout(() => {
+          reject(new Error("Timeout waiting for response to: " + cmd));
+          isProcessingCommand = false;
+          processCommandQueue();
+        }, 4000);
+
+        window._pendingCmdResolve = (res) => {
+          clearTimeout(timeout);
+          resolve(res);
+          isProcessingCommand = false;
+          processCommandQueue();
+        };
+        window._pendingCmdReject = (err) => {
+          clearTimeout(timeout);
+          reject(err);
+          isProcessingCommand = false;
+          processCommandQueue();
+        };
+      } catch(err) {
+        logTerminal("Write Error: " + err.message, "err");
+        reject(err);
+        isProcessingCommand = false;
+        processCommandQueue();
+      }
+    }
+
+    async function connectSerial() {
+      if (isConnected) {
+        disconnectSerial();
+        return;
+      }
+
+      if (!("serial" in navigator)) {
+        alert("Web Serial API is not supported in this browser. Please use Chrome or Edge.");
+        return;
+      }
+
+      try {
+        serialPort = await navigator.serial.requestPort();
+        await serialPort.open({ baudRate: 115200 });
+        serialWriter = serialPort.writable.getWriter();
+        isConnected = true;
+        updateBadge(true, "Connecting...");
+        logTerminal("Serial port opened at 115200 baud.", "info");
+
+        readSerialLoop();
+
+        // Send Handshake
+        const idRes = await sendSerialCommand("TOOL_ID");
+        if (idRes.includes("ESP32_SYSTEM_CHIMES_V2")) {
+          updateBadge(true, "V2 Hardware Online");
+          logTerminal("Handshake verified: " + idRes, "rx");
+          querySlots();
+          readHwVolume();
+        } else {
+          updateBadge(true, "Connected");
+          logTerminal("Response: " + idRes, "rx");
+        }
+      } catch(err) {
+        logTerminal("Connection failed: " + err.message, "err");
+        disconnectSerial();
+      }
+    }
+
+    async function disconnectSerial() {
+      isConnected = false;
+      if (serialReader) {
+        try { await serialReader.cancel(); } catch(e) {}
+        serialReader = null;
+      }
+      if (serialWriter) {
+        try { await serialWriter.close(); } catch(e) {}
+        serialWriter = null;
+      }
+      if (serialPort) {
+        try { await serialPort.close(); } catch(e) {}
+        serialPort = null;
+      }
+      updateBadge(false, "Offline");
+      logTerminal("Serial port disconnected.", "info");
+    }
+    document.getElementById("btnConnect").addEventListener("click", connectSerial);
+
+    async function readSerialLoop() {
+      const textDecoder = new TextDecoderStream();
+      const readableStreamClosed = serialPort.readable.pipeTo(textDecoder.writable);
+      serialReader = textDecoder.readable.getReader();
+
+      try {
+        while (isConnected) {
+          const { value, done } = await serialReader.read();
+          if (done) break;
+          if (value) {
+            lineBuffer += value;
+            let lines = lineBuffer.split(/\r?\n/);
+            lineBuffer = lines.pop(); // keep last incomplete chunk
+
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (!trimmed) continue;
+              logTerminal("RX << " + trimmed, "rx");
+
+              if (window._pendingCmdResolve) {
+                if (trimmed.startsWith("OK") || trimmed.startsWith("ERROR:")) {
+                  const res = trimmed;
+                  const cb = window._pendingCmdResolve;
+                  window._pendingCmdResolve = null;
+                  window._pendingCmdReject = null;
+                  cb(res);
+                }
+              }
+            }
+          }
+        }
+      } catch(err) {
+        if (isConnected) logTerminal("Reader loop terminated: " + err.message, "err");
+      }
+    }
+
+    // Query Slots Command
+    async function querySlots() {
+      try {
+        const res = await sendSerialCommand("QUERY_SLOTS");
+        if (res.startsWith("OK: ")) {
+          const jsonStr = res.slice(4);
+          const data = JSON.parse(jsonStr);
+          renderSlotsList(data.slots || []);
+        }
+      } catch(err) {
+        logTerminal("Query slots failed: " + err.message, "err");
+      }
+    }
+    document.getElementById("btnQuerySlots").addEventListener("click", querySlots);
+
+    function renderSlotsList(slots) {
+      const container = document.getElementById("slotListContainer");
+      container.innerHTML = "";
+      document.getElementById("slotCountBadge").textContent = slots.length + " slots";
+
+      if (slots.length === 0) {
+        container.innerHTML = `<div style="color:var(--text-muted); font-size:11px; padding:10px; text-align:center;">No slots registered.</div>`;
+        return;
+      }
+
+      slots.forEach(slot => {
+        const row = document.createElement("div");
+        row.className = "slot-row";
+        row.innerHTML = `
+          <div>
+            <strong style="color: ${slot.has_sound ? 'var(--accent-mint)' : 'var(--text-muted)'};">${slot.slot_id}</strong>
+            <span style="font-size:10px; color:var(--text-dim); margin-left:6px;">${slot.has_sound ? slot.duration_ms + 'ms' : '(Empty)'}</span>
+          </div>
+          <div style="display:flex; gap:4px;">
+            ${slot.has_sound ? `<button class="btn btn-sm" data-play="${slot.slot_id}" title="Play">▶</button>` : ''}
+            <button class="btn btn-sm" data-get="${slot.slot_id}" title="Download to Editor">⬇</button>
+            <button class="btn btn-sm btn-danger" data-del="${slot.slot_id}" title="Delete Sound">✕</button>
+          </div>
+        `;
+
+        const playBtn = row.querySelector('[data-play]');
+        if (playBtn) playBtn.addEventListener("click", () => sendSerialCommand("PLAY " + slot.slot_id));
+
+        const getBtn = row.querySelector('[data-get]');
+        if (getBtn) getBtn.addEventListener("click", () => downloadSlot(slot.slot_id));
+
+        const delBtn = row.querySelector('[data-del]');
+        if (delBtn) delBtn.addEventListener("click", async () => {
+          if (confirm(`Delete sound in slot ${slot.slot_id}?`)) {
+            await sendSerialCommand("DELETE " + slot.slot_id);
+            querySlots();
+          }
+        });
+
+        container.appendChild(row);
+      });
+    }
+
+    // Download slot definition to editor
+    async function downloadSlot(slotId) {
+      try {
+        const res = await sendSerialCommand("GET_SLOT " + slotId);
+        if (res.startsWith("OK: ")) {
+          const soundData = JSON.parse(res.slice(4));
+          // Transform firmware format to editor project format
+          const newProj = {
+            project: {
+              name: slotId,
+              slot_id: slotId,
+              total_duration_ms: soundData.total_duration_ms
+            },
+            global: { master_volume: 0.8, bpm: 120, grid_resolution_ms: 25 },
+            layers: soundData.layers.map((l, i) => ({
+              layer_id: i + 1,
+              name: "Layer " + (i + 1),
+              waveform: l.waveform,
+              volume: l.volume,
+              mute: false,
+              solo: false,
+              default_adsr: {
+                attack_ms: l.adsr.attack_ms,
+                decay_ms: l.adsr.decay_ms,
+                sustain: l.adsr.sustain_level,
+                release_ms: l.adsr.release_ms
+              },
+              notes: l.notes.map(n => ({
+                id: "n_" + Math.random(),
+                frequency_hz: n.frequency_hz,
+                start_time_ms: n.start_time_ms,
+                duration_ms: n.duration_ms
+              }))
+            }))
+          };
+          loadProjectFromObject(newProj);
+          logTerminal(`Downloaded slot ${slotId} into editor.`, "info");
+        }
+      } catch(err) {
+        logTerminal("Download slot failed: " + err.message, "err");
+      }
+    }
+
+    // Upload active sound to target slot
+    async function uploadActiveToSlot() {
+      const slotId = (document.getElementById("txtSlotId").value || "BOOT_SUCCESS").trim().toUpperCase();
+      if (!slotId || slotId.length > 15 || !/^[A-Z0-9_]+$/.test(slotId)) {
+        alert("Slot ID must contain 1-15 uppercase alphanumeric characters or underscores.");
+        return;
+      }
+
+      // Prepare firmware-compliant JSON payload
+      const payload = {
+        slot_id: slotId,
+        total_duration_ms: project.totalDurationMs,
+        layer_count: project.layers.length,
+        layers: project.layers.map(l => ({
+          waveform: l.waveform,
+          volume: parseFloat(l.volume.toFixed(2)),
+          adsr: {
+            attack_ms: Math.round(l.adsr.attack_ms),
+            decay_ms: Math.round(l.adsr.decay_ms),
+            sustain_level: parseFloat(l.adsr.sustain.toFixed(2)),
+            release_ms: Math.round(l.adsr.release_ms)
+          },
+          notes: l.notes.map(n => ({
+            start_time_ms: Math.round(n.start_time_ms),
+            duration_ms: Math.round(n.duration_ms),
+            frequency_hz: parseFloat(n.frequency_hz.toFixed(2))
+          }))
+        }))
+      };
+
+      const jsonStr = JSON.stringify(payload);
+      try {
+        logTerminal(`Uploading sound to slot ${slotId}...`, "info");
+        const res = await sendSerialCommand(`UPLOAD ${slotId} ${jsonStr}`);
+        if (res.includes("OK")) {
+          alert(`✔ Successfully uploaded to slot "${slotId}"!`);
+          querySlots();
+        } else {
+          alert("Upload failed: " + res);
+        }
+      } catch(err) {
+        alert("Upload error: " + err.message);
+      }
+    }
+    document.getElementById("btnUploadSlot").addEventListener("click", uploadActiveToSlot);
+
+    // Hardware Playback controls
+    document.getElementById("btnPlayDevice").addEventListener("click", () => {
+      const slotId = (document.getElementById("txtSlotId").value || "BOOT_SUCCESS").trim().toUpperCase();
+      sendSerialCommand("PLAY " + slotId);
+    });
+    document.getElementById("btnStopDevice").addEventListener("click", () => {
+      sendSerialCommand("STOP");
+    });
+
+    // Hardware Volume
+    const rngHwVol = document.getElementById("rngHwVol");
+    rngHwVol.addEventListener("change", (e) => {
+      const vol = parseFloat(e.target.value);
+      document.getElementById("txtHwVol").textContent = Math.round(vol * 100) + "%";
+      sendSerialCommand("SET_VOLUME " + vol.toFixed(3));
+    });
+
+    async function readHwVolume() {
+      try {
+        const res = await sendSerialCommand("GET_VOLUME");
+        if (res.startsWith("OK: ")) {
+          const vol = parseFloat(res.slice(4));
+          if (!isNaN(vol)) {
+            rngHwVol.value = vol;
+            document.getElementById("txtHwVol").textContent = Math.round(vol * 100) + "%";
+          }
+        }
+      } catch(e) {}
+    }
+
+    // Erase All
+    document.getElementById("btnEraseAll").addEventListener("click", async () => {
+      if (confirm("DANGER: Erase ALL stored chimes in flash memory (chimes_v1 namespace)?")) {
+        await sendSerialCommand("ERASE_ALL");
+        querySlots();
+      }
+    });
+
+    // Raw Command Console
+    document.getElementById("btnSendCmd").addEventListener("click", () => {
+      const inp = document.getElementById("cmdInput");
+      const cmd = inp.value.trim();
+      if (cmd) {
+        sendSerialCommand(cmd);
+        inp.value = "";
+      }
+    });
+    document.getElementById("cmdInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("btnSendCmd").click();
+    });
+
+    // Master Controls
+    document.getElementById("btnPlay").addEventListener("click", () => {
+      view.isPlaying ? stopPlayback() : startPlayback();
+    });
+    document.getElementById("btnStop").addEventListener("click", stopPlayback);
+
+    document.getElementById("selSnap").addEventListener("change", (e) => {
+      project.snap_ms = parseInt(e.target.value);
+      render();
+    });
+
+    document.getElementById("numBpm").addEventListener("input", (e) => {
+      project.bpm = Math.max(40, Math.min(300, parseInt(e.target.value) || 120));
+      render();
+    });
+
+    document.getElementById("rngMasterVol").addEventListener("input", (e) => {
+      project.master_volume = parseFloat(e.target.value);
+      document.getElementById("txtMasterVol").textContent = Math.round(project.master_volume * 100) + "%";
+    });
+
+    document.getElementById("txtSlotId").addEventListener("input", updateCPreview);
+    document.getElementById("txtProjectName").addEventListener("input", updateCPreview);
+
+    // Initial Setup
+    window.addEventListener("DOMContentLoaded", () => {
+      resizeCanvases();
+      updateLayersList();
+      updateInspector();
+      updateCPreview();
+      // Load first preset by default
+      if (BUNDLED_PRESETS["success_chime.chime.json"]) {
+        loadProjectFromObject(BUNDLED_PRESETS["success_chime.chime.json"]);
+        selPresets.value = "success_chime.chime.json";
+      }
+    });
+  </script>
+</body>
+</html>

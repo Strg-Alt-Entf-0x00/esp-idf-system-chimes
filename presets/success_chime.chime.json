@@ -1,0 +1,70 @@
+{
+  "project": {
+    "version": "2.1.0",
+    "name": "Success Chime",
+    "slot_id": "SUCCESS_CHIME",
+    "total_duration_ms": 720,
+    "created": "2026-11-07T19:27:30.131412",
+    "modified": "2026-11-07T19:27:30.131417"
+  },
+  "global": {
+    "master_volume": 0.9,
+    "bpm": 120,
+    "snap_enabled": true,
+    "grid_resolution_ms": 25
+  },
+  "layers": [
+    {
+      "layer_id": 1,
+      "name": "Triangle 01",
+      "waveform": "TRIANGLE",
+      "volume": 0.7,
+      "mute": false,
+      "solo": false,
+      "default_adsr": {
+        "attack_ms": 5,
+        "decay_ms": 25,
+        "sustain": 0.62,
+        "release_ms": 55
+      },
+      "notes": [
+        {
+          "id": "33963520-e311-4baa-87c5-b94d86a41bff",
+          "frequency_hz": 523.2511306011972,
+          "start_time_ms": 0,
+          "duration_ms": 190,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 25,
+            "sustain": 0.62,
+            "release_ms": 55
+          }
+        },
+        {
+          "id": "57f47e9f-bede-4954-b624-b80e81b8e70a",
+          "frequency_hz": 659.2551138257398,
+          "start_time_ms": 120,
+          "duration_ms": 220,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 25,
+            "sustain": 0.62,
+            "release_ms": 55
+          }
+        },
+        {
+          "id": "c190cdc8-f469-479f-807e-f1e0dc8c6681",
+          "frequency_hz": 783.9908719634985,
+          "start_time_ms": 260,
+          "duration_ms": 460,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 25,
+            "sustain": 0.62,
+            "release_ms": 55
+          }
+        }
+      ]
+    }
+  ]
+}

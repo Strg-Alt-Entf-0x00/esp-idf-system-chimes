@@ -1,0 +1,15 @@
+idf_component_register(
+    SRCS
+        "src/system_chimes.c"
+        "src/chime_synth.c"
+        "src/chime_nvs.c"
+        "src/chime_protocol.c"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        esp_timer
+        nvs_flash
+    PRIV_REQUIRES
+        cjson
+        freertos
+)

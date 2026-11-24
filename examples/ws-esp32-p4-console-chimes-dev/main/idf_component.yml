@@ -1,0 +1,5 @@
+dependencies:
+  espressif/esp_codec_dev:
+    version: "^1.6.2"
+  espressif/cjson:
+    version: "1.7.19~2"
