@@ -1,0 +1,74 @@
+{
+  "project": {
+    "version": "2.1.0",
+    "name": "Low Confirm",
+    "slot_id": "LOW_CONFIRM",
+    "total_duration_ms": 320,
+    "created": "2026-11-07T19:27:30.139807",
+    "modified": "2026-11-07T19:27:30.139824"
+  },
+  "global": {
+    "master_volume": 0.9,
+    "bpm": 120,
+    "snap_enabled": true,
+    "grid_resolution_ms": 25
+  },
+  "layers": [
+    {
+      "layer_id": 1,
+      "name": "Sawtooth 01",
+      "waveform": "SAWTOOTH",
+      "volume": 0.48,
+      "mute": false,
+      "solo": false,
+      "default_adsr": {
+        "attack_ms": 3,
+        "decay_ms": 30,
+        "sustain": 0.38,
+        "release_ms": 45
+      },
+      "notes": [
+        {
+          "id": "00a16e76-a807-4a56-94e7-1743aa179c89",
+          "frequency_hz": 261.6255653005986,
+          "start_time_ms": 0,
+          "duration_ms": 320,
+          "adsr": {
+            "attack_ms": 3,
+            "decay_ms": 30,
+            "sustain": 0.38,
+            "release_ms": 45
+          }
+        }
+      ]
+    },
+    {
+      "layer_id": 2,
+      "name": "Sine 02",
+      "waveform": "SINE",
+      "volume": 0.26,
+      "mute": false,
+      "solo": false,
+      "default_adsr": {
+        "attack_ms": 5,
+        "decay_ms": 35,
+        "sustain": 0.3,
+        "release_ms": 40
+      },
+      "notes": [
+        {
+          "id": "2ca06b62-22fb-4084-ae30-b81910b62552",
+          "frequency_hz": 391.99543598174927,
+          "start_time_ms": 20,
+          "duration_ms": 280,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 35,
+            "sustain": 0.3,
+            "release_ms": 40
+          }
+        }
+      ]
+    }
+  ]
+}

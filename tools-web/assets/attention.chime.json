@@ -1,0 +1,98 @@
+{
+  "project": {
+    "version": "2.1.0",
+    "name": "Attention Pulse",
+    "slot_id": "ATTENTION",
+    "total_duration_ms": 570,
+    "created": "2026-11-07T19:27:30.135550",
+    "modified": "2026-11-07T19:27:30.135573"
+  },
+  "global": {
+    "master_volume": 0.9,
+    "bpm": 120,
+    "snap_enabled": true,
+    "grid_resolution_ms": 25
+  },
+  "layers": [
+    {
+      "layer_id": 1,
+      "name": "Square 01",
+      "waveform": "SQUARE",
+      "volume": 0.62,
+      "mute": false,
+      "solo": false,
+      "default_adsr": {
+        "attack_ms": 2,
+        "decay_ms": 18,
+        "sustain": 0.3,
+        "release_ms": 35
+      },
+      "notes": [
+        {
+          "id": "b839c3a3-5965-4abb-92a5-6a12a3a24046",
+          "frequency_hz": 659.2551138257398,
+          "start_time_ms": 0,
+          "duration_ms": 160,
+          "adsr": {
+            "attack_ms": 2,
+            "decay_ms": 18,
+            "sustain": 0.3,
+            "release_ms": 35
+          }
+        },
+        {
+          "id": "a772a187-bd57-44e0-9909-5e42e958f324",
+          "frequency_hz": 523.2511306011972,
+          "start_time_ms": 200,
+          "duration_ms": 160,
+          "adsr": {
+            "attack_ms": 2,
+            "decay_ms": 18,
+            "sustain": 0.3,
+            "release_ms": 35
+          }
+        },
+        {
+          "id": "d49567f1-24a1-4f16-97ec-fc0c4c714285",
+          "frequency_hz": 659.2551138257398,
+          "start_time_ms": 400,
+          "duration_ms": 160,
+          "adsr": {
+            "attack_ms": 2,
+            "decay_ms": 18,
+            "sustain": 0.3,
+            "release_ms": 35
+          }
+        }
+      ]
+    },
+    {
+      "layer_id": 2,
+      "name": "Noise 02",
+      "waveform": "NOISE",
+      "volume": 0.16,
+      "mute": false,
+      "solo": false,
+      "default_adsr": {
+        "attack_ms": 1,
+        "decay_ms": 20,
+        "sustain": 0.15,
+        "release_ms": 90
+      },
+      "notes": [
+        {
+          "id": "9501da23-2559-4037-9898-2d862ff918d1",
+          "frequency_hz": 523.2511306011972,
+          "start_time_ms": 10,
+          "duration_ms": 560,
+          "adsr": {
+            "attack_ms": 1,
+            "decay_ms": 20,
+            "sustain": 0.15,
+            "release_ms": 90
+          }
+        }
+      ]
+    }
+  ]
+}

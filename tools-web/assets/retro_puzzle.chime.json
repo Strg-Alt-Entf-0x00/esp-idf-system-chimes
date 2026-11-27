@@ -1,0 +1,510 @@
+{
+  "project": {
+    "version": "2.1.0",
+    "name": "Original Retro Puzzle Melody",
+    "slot_id": "RETRO_PUZZLE",
+    "total_duration_ms": 12722,
+    "created": "2026-11-07T19:27:30.122438",
+    "modified": "2026-11-07T19:27:30.122549"
+  },
+  "global": {
+    "master_volume": 0.9,
+    "bpm": 108,
+    "snap_enabled": true,
+    "grid_resolution_ms": 25
+  },
+  "layers": [
+    {
+      "layer_id": 1,
+      "name": "Square 01",
+      "waveform": "SQUARE",
+      "volume": 0.72,
+      "mute": false,
+      "solo": false,
+      "default_adsr": {
+        "attack_ms": 8,
+        "decay_ms": 35,
+        "sustain": 0.58,
+        "release_ms": 40
+      },
+      "notes": [
+        {
+          "id": "cd19a200-0c35-436b-89fc-5379f2c97f2a",
+          "frequency_hz": 587.3295358348151,
+          "start_time_ms": 0,
+          "duration_ms": 400,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "93b71b06-9e5b-44b6-babc-05934f78e334",
+          "frequency_hz": 698.4564628660078,
+          "start_time_ms": 417,
+          "duration_ms": 178,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "0ba38a24-4db7-4593-ad63-b2174deade56",
+          "frequency_hz": 783.9908719634985,
+          "start_time_ms": 611,
+          "duration_ms": 306,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "79c67ce2-fdf0-4acb-a42e-59c0db0419ae",
+          "frequency_hz": 880.0,
+          "start_time_ms": 972,
+          "duration_ms": 189,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "5cc3a031-5fd7-41c6-a57d-d0c6275f0d6d",
+          "frequency_hz": 783.9908719634985,
+          "start_time_ms": 1183,
+          "duration_ms": 378,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "d58adc18-9286-4a86-a2f7-debca38d1eed",
+          "frequency_hz": 523.2511306011972,
+          "start_time_ms": 1667,
+          "duration_ms": 233,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "6d902a5e-7ec0-4ea2-a9ac-0a7a5c2e7a6c",
+          "frequency_hz": 587.3295358348151,
+          "start_time_ms": 1933,
+          "duration_ms": 189,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "14f96e82-9d6c-4b5c-9002-bba283b0bcc0",
+          "frequency_hz": 698.4564628660078,
+          "start_time_ms": 2144,
+          "duration_ms": 417,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "377772c3-1150-4510-8d5d-c20b2b2b84d7",
+          "frequency_hz": 659.2551138257398,
+          "start_time_ms": 2622,
+          "duration_ms": 194,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "8303d50b-d4ce-45e1-8c91-10cf6923288f",
+          "frequency_hz": 523.2511306011972,
+          "start_time_ms": 2822,
+          "duration_ms": 233,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "3e9640a6-ee15-438e-9011-abb0f43d0c6b",
+          "frequency_hz": 587.3295358348151,
+          "start_time_ms": 3083,
+          "duration_ms": 361,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "58353ecf-2aa9-40a5-9bdd-b1717f3f5435",
+          "frequency_hz": 440.0,
+          "start_time_ms": 3528,
+          "duration_ms": 167,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "5d8d26fb-1c9b-464b-9bdc-19af3effa85b",
+          "frequency_hz": 523.2511306011972,
+          "start_time_ms": 3722,
+          "duration_ms": 289,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "1edcc302-ca79-4ea8-9112-10b767d81b38",
+          "frequency_hz": 698.4564628660078,
+          "start_time_ms": 4044,
+          "duration_ms": 194,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "26174a44-ee8b-4e35-b2f0-710bfa1c231f",
+          "frequency_hz": 659.2551138257398,
+          "start_time_ms": 4267,
+          "duration_ms": 267,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "17ca8b5c-a5da-437f-a057-3fa88d796fc8",
+          "frequency_hz": 587.3295358348151,
+          "start_time_ms": 4567,
+          "duration_ms": 411,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "0e7eab97-78dd-498b-975d-4b4bf8687327",
+          "frequency_hz": 440.0,
+          "start_time_ms": 5028,
+          "duration_ms": 211,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "0e874724-f7f2-405b-9021-cb11898758bc",
+          "frequency_hz": 523.2511306011972,
+          "start_time_ms": 5267,
+          "duration_ms": 511,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "4f3f57b9-6460-4bd7-9f84-9fd9bb4fb836",
+          "frequency_hz": 587.3295358348151,
+          "start_time_ms": 5822,
+          "duration_ms": 200,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "f4028ac4-ce81-49c8-8bcb-792523f05c04",
+          "frequency_hz": 698.4564628660078,
+          "start_time_ms": 6044,
+          "duration_ms": 278,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        },
+        {
+          "id": "741ec616-78ee-404b-8a12-e6c57ba7ea9a",
+          "frequency_hz": 523.2511306011972,
+          "start_time_ms": 6361,
+          "duration_ms": 583,
+          "adsr": {
+            "attack_ms": 8,
+            "decay_ms": 35,
+            "sustain": 0.58,
+            "release_ms": 40
+          }
+        }
+      ]
+    },
+    {
+      "layer_id": 2,
+      "name": "Triangle 02",
+      "waveform": "TRIANGLE",
+      "volume": 0.58,
+      "mute": false,
+      "solo": false,
+      "default_adsr": {
+        "attack_ms": 5,
+        "decay_ms": 45,
+        "sustain": 0.48,
+        "release_ms": 45
+      },
+      "notes": [
+        {
+          "id": "105cbe93-1b2b-4cab-b705-17880555a623",
+          "frequency_hz": 146.8323839587038,
+          "start_time_ms": 0,
+          "duration_ms": 267,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 45,
+            "sustain": 0.48,
+            "release_ms": 45
+          }
+        },
+        {
+          "id": "acd3bfa6-8182-411b-98d1-732cf182ee3b",
+          "frequency_hz": 146.8323839587038,
+          "start_time_ms": 1667,
+          "duration_ms": 267,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 45,
+            "sustain": 0.48,
+            "release_ms": 45
+          }
+        },
+        {
+          "id": "07e83cbf-5af7-4b78-9b0d-e2311a3effe5",
+          "frequency_hz": 146.8323839587038,
+          "start_time_ms": 3333,
+          "duration_ms": 267,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 45,
+            "sustain": 0.48,
+            "release_ms": 45
+          }
+        },
+        {
+          "id": "1f59222d-246a-47b7-bbcb-eae6183eb6f1",
+          "frequency_hz": 146.8323839587038,
+          "start_time_ms": 5000,
+          "duration_ms": 267,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 45,
+            "sustain": 0.48,
+            "release_ms": 45
+          }
+        },
+        {
+          "id": "0b96861b-9184-4acb-bd97-3b00673f4223",
+          "frequency_hz": 146.8323839587038,
+          "start_time_ms": 6667,
+          "duration_ms": 267,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 45,
+            "sustain": 0.48,
+            "release_ms": 45
+          }
+        },
+        {
+          "id": "0f344464-e71f-45c6-a67b-f1ca37c31f8f",
+          "frequency_hz": 146.8323839587038,
+          "start_time_ms": 8333,
+          "duration_ms": 267,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 45,
+            "sustain": 0.48,
+            "release_ms": 45
+          }
+        },
+        {
+          "id": "52b821c1-b8e9-46b5-9c79-8e1911c4ff0f",
+          "frequency_hz": 146.8323839587038,
+          "start_time_ms": 10000,
+          "duration_ms": 267,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 45,
+            "sustain": 0.48,
+            "release_ms": 45
+          }
+        },
+        {
+          "id": "a939a063-3d2f-41a0-a298-5cc008afe187",
+          "frequency_hz": 146.8323839587038,
+          "start_time_ms": 11667,
+          "duration_ms": 267,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 45,
+            "sustain": 0.48,
+            "release_ms": 45
+          }
+        }
+      ]
+    },
+    {
+      "layer_id": 3,
+      "name": "Sine 03",
+      "waveform": "SINE",
+      "volume": 0.38,
+      "mute": false,
+      "solo": false,
+      "default_adsr": {
+        "attack_ms": 5,
+        "decay_ms": 30,
+        "sustain": 0.4,
+        "release_ms": 35
+      },
+      "notes": [
+        {
+          "id": "7dd20144-b3ce-4bcb-8de2-62364a04cc3c",
+          "frequency_hz": 220.0,
+          "start_time_ms": 844,
+          "duration_ms": 211,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 30,
+            "sustain": 0.4,
+            "release_ms": 35
+          }
+        },
+        {
+          "id": "a7c3dc0d-d189-4e3a-bd3a-e90ec05bbb8f",
+          "frequency_hz": 293.6647679174076,
+          "start_time_ms": 2511,
+          "duration_ms": 211,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 30,
+            "sustain": 0.4,
+            "release_ms": 35
+          }
+        },
+        {
+          "id": "5f2c4f9a-1d05-4328-9669-f91b99aa8f17",
+          "frequency_hz": 329.6275569128699,
+          "start_time_ms": 4178,
+          "duration_ms": 211,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 30,
+            "sustain": 0.4,
+            "release_ms": 35
+          }
+        },
+        {
+          "id": "49721574-d83b-44c6-9b5d-9f2944091d2c",
+          "frequency_hz": 261.6255653005986,
+          "start_time_ms": 5844,
+          "duration_ms": 211,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 30,
+            "sustain": 0.4,
+            "release_ms": 35
+          }
+        },
+        {
+          "id": "f7955f93-1294-42cd-9491-fba3453f20a1",
+          "frequency_hz": 220.0,
+          "start_time_ms": 7511,
+          "duration_ms": 211,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 30,
+            "sustain": 0.4,
+            "release_ms": 35
+          }
+        },
+        {
+          "id": "c7cdd4d0-5fdf-4e60-919a-7396bebeac49",
+          "frequency_hz": 329.6275569128699,
+          "start_time_ms": 9178,
+          "duration_ms": 211,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 30,
+            "sustain": 0.4,
+            "release_ms": 35
+          }
+        },
+        {
+          "id": "0768fae1-ef0b-491d-8e81-9d1d184b6dbe",
+          "frequency_hz": 293.6647679174076,
+          "start_time_ms": 10844,
+          "duration_ms": 211,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 30,
+            "sustain": 0.4,
+            "release_ms": 35
+          }
+        },
+        {
+          "id": "d1e48bc1-8d3f-413c-87d1-0dbf19e2d75e",
+          "frequency_hz": 220.0,
+          "start_time_ms": 12511,
+          "duration_ms": 211,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 30,
+            "sustain": 0.4,
+            "release_ms": 35
+          }
+        }
+      ]
+    }
+  ]
+}

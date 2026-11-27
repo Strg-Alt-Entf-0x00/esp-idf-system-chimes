@@ -1,0 +1,70 @@
+{
+  "project": {
+    "version": "2.1.0",
+    "name": "Low Battery",
+    "slot_id": "BATTERY_LOW",
+    "total_duration_ms": 610,
+    "created": "2026-11-07T00:00:00",
+    "modified": "2026-11-07T00:00:00"
+  },
+  "global": {
+    "master_volume": 0.85,
+    "bpm": 120,
+    "snap_enabled": true,
+    "grid_resolution_ms": 10
+  },
+  "layers": [
+    {
+      "layer_id": 1,
+      "name": "Battery Alert",
+      "waveform": "TRIANGLE",
+      "volume": 0.65,
+      "mute": false,
+      "solo": false,
+      "default_adsr": {
+        "attack_ms": 5,
+        "decay_ms": 40,
+        "sustain": 0.45,
+        "release_ms": 75
+      },
+      "notes": [
+        {
+          "id": "30000000-0000-4000-8000-000000000001",
+          "frequency_hz": 783.99,
+          "start_time_ms": 0,
+          "duration_ms": 160,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 40,
+            "sustain": 0.45,
+            "release_ms": 75
+          }
+        },
+        {
+          "id": "30000000-0000-4000-8000-000000000002",
+          "frequency_hz": 659.25,
+          "start_time_ms": 220,
+          "duration_ms": 160,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 40,
+            "sustain": 0.45,
+            "release_ms": 75
+          }
+        },
+        {
+          "id": "30000000-0000-4000-8000-000000000003",
+          "frequency_hz": 523.25,
+          "start_time_ms": 440,
+          "duration_ms": 170,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 40,
+            "sustain": 0.45,
+            "release_ms": 75
+          }
+        }
+      ]
+    }
+  ]
+}

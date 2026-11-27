@@ -43,7 +43,7 @@ its options. The wrapper's local settings are stored in
 
 ## Connect with the Web Studio
 
-Open [tools-web/chimes_studio.html](../../tools-web/chimes_studio.html) in Google Chrome or Microsoft Edge.
+Open [tools-web/index.html](../../tools-web/index.html) in Google Chrome or Microsoft Edge.
 
 Click **Connect ESP32**, select the board's serial port at 115200 baud, and connect. The firmware registers these initially empty sound slots:
 

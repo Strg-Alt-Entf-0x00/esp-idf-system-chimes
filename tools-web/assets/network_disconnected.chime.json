@@ -1,0 +1,58 @@
+{
+  "project": {
+    "version": "2.1.0",
+    "name": "Network Disconnected",
+    "slot_id": "NETWORK_DOWN",
+    "total_duration_ms": 320,
+    "created": "2026-11-07T00:00:00",
+    "modified": "2026-11-07T00:00:00"
+  },
+  "global": {
+    "master_volume": 0.9,
+    "bpm": 120,
+    "snap_enabled": true,
+    "grid_resolution_ms": 10
+  },
+  "layers": [
+    {
+      "layer_id": 1,
+      "name": "Disconnected",
+      "waveform": "TRIANGLE",
+      "volume": 0.65,
+      "mute": false,
+      "solo": false,
+      "default_adsr": {
+        "attack_ms": 5,
+        "decay_ms": 45,
+        "sustain": 0.5,
+        "release_ms": 75
+      },
+      "notes": [
+        {
+          "id": "20000000-0000-4000-8000-000000000001",
+          "frequency_hz": 783.99,
+          "start_time_ms": 0,
+          "duration_ms": 125,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 45,
+            "sustain": 0.5,
+            "release_ms": 75
+          }
+        },
+        {
+          "id": "20000000-0000-4000-8000-000000000002",
+          "frequency_hz": 587.33,
+          "start_time_ms": 170,
+          "duration_ms": 150,
+          "adsr": {
+            "attack_ms": 5,
+            "decay_ms": 45,
+            "sustain": 0.5,
+            "release_ms": 75
+          }
+        }
+      ]
+    }
+  ]
+}

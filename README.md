@@ -33,7 +33,7 @@ the renderer with its own audio output.
   driver.
 - Optional serial commands for querying, uploading, reading, deleting, and
   auditioning stored sounds.
-- Standalone zero-install Web Serial Studio in `tools-web/chimes_studio.html`
+- Standalone zero-install Web Serial Studio in `tools-web/index.html`
   with interactive Piano Roll, Web Audio PC preview, 12 bundled sound presets,
   1-click C code generator, and direct ESP32 hardware audition.
 - Optional PyQt6 piano-roll editor with local PC preview, project JSON
@@ -171,7 +171,7 @@ For board-specific pin assignments, setup, and serial usage, see the
 
 ## Web Studio and Presets
 
-Launch the standalone studio by opening [tools-web/chimes_studio.html](tools-web/chimes_studio.html) in Google Chrome or Microsoft Edge.
+Launch the standalone studio by opening [tools-web/index.html](tools-web/index.html) in Google Chrome or Microsoft Edge.
 
 The editor supports note placement, selection, movement, resizing, overlapping
 notes, and scrolling/zooming the piano roll. PC preview synthesizes the current
@@ -207,22 +207,22 @@ The protocol handler's `PLAY` command is for the example's integrated playback
 task. Applications using the component API directly should manage rendering
 and output through their own audio task.
 
-## Standalone Web Serial Studio
+## System Chimes Studio
 
-Open [tools-web/chimes_studio.html](./tools-web/chimes_studio.html) in Google Chrome or Microsoft Edge.
+Open [tools-web/index.html](./tools-web/index.html) in Google Chrome or Microsoft Edge.
 
-- **Zero Install:** Single-file self-contained HTML tool with no Python, dependencies, or local web server needed.
+- **Zero Install:** Modular local HTML, CSS, and JavaScript files with no Python, dependencies, or local web server needed.
 - **Piano Roll:** Interactive canvas editor supporting up to 8 layers, 32 notes per layer, and 5 waveforms (Sine, Square, Triangle, Sawtooth, Noise).
 - **Web Audio Engine:** Real-time synthesis preview on PC with per-layer ADSR envelope curves and polyphonic playback.
 - **12 Bundled Sound Presets:** Instant selection of ready-to-use system chimes (boot, low battery, network state, wake alarm, etc.).
 - **Hardware Integration:** Connect directly to ESP32 over Web Serial at 115200 baud to query slots, upload chimes into NVS, audition playback on speaker, and manage volume.
-- **C Code Generator:** 1-click export of static C structs ready to embed directly into ESP-IDF firmware.
+- **Project Files:** Import and export editable chime projects as JSON.
 
 ## Tests
 
 ### Automated Web Studio tests
 
-Run the validation suite for the single-file web studio:
+Run the validation suite for the browser Studio and its local assets:
 
 ```powershell
 python tests/test_web_chimes_studio.py

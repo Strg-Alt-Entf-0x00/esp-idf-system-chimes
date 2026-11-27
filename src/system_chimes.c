@@ -413,19 +413,36 @@ esp_err_t chime_play(const char* slot_id, chime_handle_t* handle) {
         return ret;
     }
     
-    // Create synthesizer handle
-    ret = chime_synth_create(sound, s_state.config.sample_rate, 
-                             s_state.config.master_volume, handle);
+    ret = chime_play_sound(sound, handle);
+    free(sound);
+    return ret;
+}
+
+esp_err_t chime_play_sound(const chime_sound_t* sound, chime_handle_t* handle) {
+    if (!s_state.initialized) {
+        ESP_LOGE(TAG, "Not initialized");
+        return ESP_ERR_INVALID_STATE;
+    }
+    
+    if (!s_state.config.enabled) {
+        ESP_LOGD(TAG, "Chimes disabled");
+        return ESP_ERR_INVALID_STATE;
+    }
+    
+    if (!sound || !handle) {
+        ESP_LOGE(TAG, "Invalid arguments");
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    esp_err_t ret = chime_synth_create(sound, s_state.config.sample_rate, 
+                                       s_state.config.master_volume, handle);
     if (ret != ESP_OK) {
-        free(sound);
         ESP_LOGE(TAG, "Failed to create synthesizer: %s", esp_err_to_name(ret));
         return ret;
     }
     
-    ESP_LOGI(TAG, "Playing '%s' (%lu ms, %d layers)", 
-             slot_id, sound->total_duration_ms, sound->layer_count);
-    free(sound);
-    
+    ESP_LOGI(TAG, "Playing sound '%s' (%lu ms, %d layers)", 
+             sound->slot_id, (unsigned long)sound->total_duration_ms, sound->layer_count);
     return ESP_OK;
 }
 

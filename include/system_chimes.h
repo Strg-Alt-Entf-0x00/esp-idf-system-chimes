@@ -279,6 +279,15 @@ esp_err_t chime_has_sound(const char* slot_id, bool* has_sound);
 esp_err_t chime_play(const char* slot_id, chime_handle_t* handle);
 
 /**
+ * @brief Play a chime sound structure directly (without requiring NVS storage)
+ * 
+ * @param sound Pointer to sound definition
+ * @param[out] handle Playback handle
+ * @return ESP_OK on success
+ */
+esp_err_t chime_play_sound(const chime_sound_t* sound, chime_handle_t* handle);
+
+/**
  * @brief Render PCM samples
  * 
  * Call this repeatedly to get audio data.

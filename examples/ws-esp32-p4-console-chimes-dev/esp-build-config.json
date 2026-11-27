@@ -1,15 +1,15 @@
 {
     "workflow": {
         "clean_build_prompt": false,
-        "default_action": "build"
+        "default_action": "flash"
     },
     "esp_idf": {
-        "path": null
+        "path": "C:\\esp\\v6.0.2\\esp-idf"
     },
     "serial": {
-        "port": null,
-        "flash_baudrate": null,
-        "monitor_baudrate": null
+        "port": "COM4",
+        "flash_baudrate": 921600,
+        "monitor_baudrate": 115200
     },
     "storage": {
         "flash_images": false

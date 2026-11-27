@@ -237,6 +237,128 @@ failed:
 }
 
 /* Command: UPLOAD <slot_id> <json> */
+static chime_sound_t* parse_sound_cjson(cJSON* root, const char* slot_id) {
+    if (!root) return NULL;
+
+    chime_sound_t* sound = calloc(1, sizeof(*sound));
+    if (!sound) return NULL;
+
+    if (slot_id) {
+        strncpy(sound->slot_id, slot_id, CHIME_SLOT_ID_MAX_LEN - 1);
+        sound->slot_id[CHIME_SLOT_ID_MAX_LEN - 1] = '\0';
+    }
+
+    cJSON* duration = cJSON_GetObjectItem(root, "total_duration_ms");
+    cJSON* layers = cJSON_GetObjectItem(root, "layers");
+    if (!cJSON_IsNumber(duration) || !isfinite(duration->valuedouble) ||
+        duration->valuedouble < 1.0 || duration->valuedouble > UINT32_MAX ||
+        floor(duration->valuedouble) != duration->valuedouble ||
+        !cJSON_IsArray(layers)) {
+        free(sound);
+        return NULL;
+    }
+
+    int layer_count = cJSON_GetArraySize(layers);
+    if (layer_count < 1 || layer_count > CHIME_MAX_LAYERS) {
+        free(sound);
+        return NULL;
+    }
+
+    sound->total_duration_ms = (uint32_t)duration->valuedouble;
+    sound->layer_count = (uint8_t)layer_count;
+
+    for (uint8_t i = 0; i < sound->layer_count; i++) {
+        cJSON* layer_obj = cJSON_GetArrayItem(layers, i);
+        if (!cJSON_IsObject(layer_obj)) {
+            free(sound);
+            return NULL;
+        }
+
+        chime_layer_t* layer = &sound->layers[i];
+        cJSON* wf = cJSON_GetObjectItem(layer_obj, "waveform");
+        cJSON* vol = cJSON_GetObjectItem(layer_obj, "volume");
+        cJSON* adsr = cJSON_GetObjectItem(layer_obj, "adsr");
+        cJSON* notes = cJSON_GetObjectItem(layer_obj, "notes");
+        if (!cJSON_IsNumber(wf) || !isfinite(wf->valuedouble) ||
+            floor(wf->valuedouble) != wf->valuedouble ||
+            wf->valuedouble < CHIME_WAVE_SINE || wf->valuedouble >= CHIME_WAVE_MAX ||
+            !cJSON_IsNumber(vol) || !isfinite(vol->valuedouble) ||
+            vol->valuedouble < 0.0 || vol->valuedouble > 1.0 ||
+            !cJSON_IsObject(adsr) || !cJSON_IsArray(notes)) {
+            free(sound);
+            return NULL;
+        }
+
+        layer->waveform = (chime_waveform_t)wf->valuedouble;
+        layer->volume = (float)vol->valuedouble;
+        cJSON* attack = cJSON_GetObjectItem(adsr, "attack_ms");
+        cJSON* decay = cJSON_GetObjectItem(adsr, "decay_ms");
+        cJSON* sustain = cJSON_GetObjectItem(adsr, "sustain_level");
+        cJSON* release = cJSON_GetObjectItem(adsr, "release_ms");
+        cJSON* adsr_values[] = {attack, decay, release};
+        for (size_t value = 0; value < sizeof(adsr_values) / sizeof(adsr_values[0]); value++) {
+            cJSON* item = adsr_values[value];
+            if (!cJSON_IsNumber(item) || !isfinite(item->valuedouble) ||
+                item->valuedouble < 0.0 || item->valuedouble > UINT16_MAX ||
+                floor(item->valuedouble) != item->valuedouble) {
+                free(sound);
+                return NULL;
+            }
+        }
+
+        if (!cJSON_IsNumber(sustain) || !isfinite(sustain->valuedouble) ||
+            sustain->valuedouble < 0.0 || sustain->valuedouble > 1.0) {
+            free(sound);
+            return NULL;
+        }
+
+        layer->adsr.attack_ms = (uint16_t)attack->valuedouble;
+        layer->adsr.decay_ms = (uint16_t)decay->valuedouble;
+        layer->adsr.sustain_level = (float)sustain->valuedouble;
+        layer->adsr.release_ms = (uint16_t)release->valuedouble;
+
+        int note_count = cJSON_GetArraySize(notes);
+        if (note_count > CHIME_MAX_NOTES) {
+            free(sound);
+            return NULL;
+        }
+        layer->note_count = (uint8_t)note_count;
+
+        for (uint8_t n = 0; n < layer->note_count; n++) {
+            cJSON* note_obj = cJSON_GetArrayItem(notes, n);
+            if (!cJSON_IsObject(note_obj)) {
+                free(sound);
+                return NULL;
+            }
+
+            cJSON* start = cJSON_GetObjectItem(note_obj, "start_time_ms");
+            cJSON* note_duration = cJSON_GetObjectItem(note_obj, "duration_ms");
+            cJSON* frequency = cJSON_GetObjectItem(note_obj, "frequency_hz");
+            if (!cJSON_IsNumber(start) || !isfinite(start->valuedouble) ||
+                start->valuedouble < 0.0 || start->valuedouble > UINT32_MAX ||
+                floor(start->valuedouble) != start->valuedouble ||
+                !cJSON_IsNumber(note_duration) || !isfinite(note_duration->valuedouble) ||
+                note_duration->valuedouble < 1.0 || note_duration->valuedouble > UINT32_MAX ||
+                floor(note_duration->valuedouble) != note_duration->valuedouble ||
+                (uint64_t)start->valuedouble + (uint64_t)note_duration->valuedouble >
+                    sound->total_duration_ms ||
+                !cJSON_IsNumber(frequency) || !isfinite(frequency->valuedouble) ||
+                frequency->valuedouble <= 0.0 || frequency->valuedouble > 20000.0) {
+                free(sound);
+                return NULL;
+            }
+
+            chime_note_t* note = &layer->notes[n];
+            note->start_time_ms = (uint32_t)start->valuedouble;
+            note->duration_ms = (uint32_t)note_duration->valuedouble;
+            note->frequency_hz = (float)frequency->valuedouble;
+        }
+    }
+
+    return sound;
+}
+
+/* Command: UPLOAD <slot_id> <json> */
 static void cmd_upload(const char* args, char* response, size_t size) {
     char slot_id[CHIME_SLOT_ID_MAX_LEN];
     const char* json_start = strchr(args, ' ');
@@ -267,115 +389,13 @@ static void cmd_upload(const char* args, char* response, size_t size) {
         return;
     }
 
-    chime_sound_t* sound = calloc(1, sizeof(*sound));
+    chime_sound_t* sound = parse_sound_cjson(root, slot_id);
+    cJSON_Delete(root);
     if (!sound) {
-        cJSON_Delete(root);
-        respond_error(response, size, "Out of memory");
+        respond_error(response, size, "Invalid sound data");
         return;
     }
-
-    memcpy(sound->slot_id, slot_id, slot_id_len);
-    sound->slot_id[slot_id_len] = '\0';
-
-    cJSON* duration = cJSON_GetObjectItem(root, "total_duration_ms");
-    cJSON* layers = cJSON_GetObjectItem(root, "layers");
-    if (!cJSON_IsNumber(duration) || !isfinite(duration->valuedouble) ||
-        duration->valuedouble < 1.0 || duration->valuedouble > UINT32_MAX ||
-        floor(duration->valuedouble) != duration->valuedouble ||
-        !cJSON_IsArray(layers)) {
-        goto invalid_sound;
-    }
-
-    int layer_count = cJSON_GetArraySize(layers);
-    if (layer_count < 1 || layer_count > CHIME_MAX_LAYERS) {
-        goto invalid_sound;
-    }
-
-    sound->total_duration_ms = (uint32_t)duration->valuedouble;
-    sound->layer_count = (uint8_t)layer_count;
-
-    for (uint8_t i = 0; i < sound->layer_count; i++) {
-        cJSON* layer_obj = cJSON_GetArrayItem(layers, i);
-        if (!cJSON_IsObject(layer_obj)) {
-            goto invalid_sound;
-        }
-
-        chime_layer_t* layer = &sound->layers[i];
-        cJSON* wf = cJSON_GetObjectItem(layer_obj, "waveform");
-        cJSON* vol = cJSON_GetObjectItem(layer_obj, "volume");
-        cJSON* adsr = cJSON_GetObjectItem(layer_obj, "adsr");
-        cJSON* notes = cJSON_GetObjectItem(layer_obj, "notes");
-        if (!cJSON_IsNumber(wf) || !isfinite(wf->valuedouble) ||
-            floor(wf->valuedouble) != wf->valuedouble ||
-            wf->valuedouble < CHIME_WAVE_SINE || wf->valuedouble >= CHIME_WAVE_MAX ||
-            !cJSON_IsNumber(vol) || !isfinite(vol->valuedouble) ||
-            vol->valuedouble < 0.0 || vol->valuedouble > 1.0 ||
-            !cJSON_IsObject(adsr) || !cJSON_IsArray(notes)) {
-            goto invalid_sound;
-        }
-
-        layer->waveform = (chime_waveform_t)wf->valuedouble;
-        layer->volume = (float)vol->valuedouble;
-        cJSON* attack = cJSON_GetObjectItem(adsr, "attack_ms");
-        cJSON* decay = cJSON_GetObjectItem(adsr, "decay_ms");
-        cJSON* sustain = cJSON_GetObjectItem(adsr, "sustain_level");
-        cJSON* release = cJSON_GetObjectItem(adsr, "release_ms");
-        cJSON* adsr_values[] = {attack, decay, release};
-        for (size_t value = 0; value < sizeof(adsr_values) / sizeof(adsr_values[0]); value++) {
-            cJSON* item = adsr_values[value];
-            if (!cJSON_IsNumber(item) || !isfinite(item->valuedouble) ||
-                item->valuedouble < 0.0 || item->valuedouble > UINT16_MAX ||
-                floor(item->valuedouble) != item->valuedouble) {
-                goto invalid_sound;
-            }
-        }
-
-        if (!cJSON_IsNumber(sustain) || !isfinite(sustain->valuedouble) ||
-            sustain->valuedouble < 0.0 || sustain->valuedouble > 1.0) {
-            goto invalid_sound;
-        }
-
-        layer->adsr.attack_ms = (uint16_t)attack->valuedouble;
-        layer->adsr.decay_ms = (uint16_t)decay->valuedouble;
-        layer->adsr.sustain_level = (float)sustain->valuedouble;
-        layer->adsr.release_ms = (uint16_t)release->valuedouble;
-
-        int note_count = cJSON_GetArraySize(notes);
-        if (note_count > CHIME_MAX_NOTES) {
-            goto invalid_sound;
-        }
-        layer->note_count = (uint8_t)note_count;
-
-        for (uint8_t n = 0; n < layer->note_count; n++) {
-            cJSON* note_obj = cJSON_GetArrayItem(notes, n);
-            if (!cJSON_IsObject(note_obj)) {
-                goto invalid_sound;
-            }
-
-            cJSON* start = cJSON_GetObjectItem(note_obj, "start_time_ms");
-            cJSON* note_duration = cJSON_GetObjectItem(note_obj, "duration_ms");
-            cJSON* frequency = cJSON_GetObjectItem(note_obj, "frequency_hz");
-            if (!cJSON_IsNumber(start) || !isfinite(start->valuedouble) ||
-                start->valuedouble < 0.0 || start->valuedouble > UINT32_MAX ||
-                floor(start->valuedouble) != start->valuedouble ||
-                !cJSON_IsNumber(note_duration) || !isfinite(note_duration->valuedouble) ||
-                note_duration->valuedouble < 1.0 || note_duration->valuedouble > UINT32_MAX ||
-                floor(note_duration->valuedouble) != note_duration->valuedouble ||
-                (uint64_t)start->valuedouble + (uint64_t)note_duration->valuedouble >
-                    sound->total_duration_ms ||
-                !cJSON_IsNumber(frequency) || !isfinite(frequency->valuedouble) ||
-                frequency->valuedouble <= 0.0 || frequency->valuedouble > 20000.0) {
-                goto invalid_sound;
-            }
-
-            chime_note_t* note = &layer->notes[n];
-            note->start_time_ms = (uint32_t)start->valuedouble;
-            note->duration_ms = (uint32_t)note_duration->valuedouble;
-            note->frequency_hz = (float)frequency->valuedouble;
-        }
-    }
     
-    cJSON_Delete(root);
     esp_err_t ret = chime_save_sound(sound);
     free(sound);
     if (ret != ESP_OK) {
@@ -384,12 +404,102 @@ static void cmd_upload(const char* args, char* response, size_t size) {
     }
     
     respond_ok(response, size, "Sound uploaded");
-    return;
+}
 
-invalid_sound:
+/* Command: PREVIEW <json> */
+static void cmd_preview(const char* json_start, char* response, size_t size) {
+    if (!json_start || !json_start[0]) {
+        respond_error(response, size, "Usage: PREVIEW <json>");
+        return;
+    }
+    
+    cJSON* root = cJSON_Parse(json_start);
+    if (!root) {
+        respond_error(response, size, "Invalid JSON");
+        return;
+    }
+
+    chime_sound_t* sound = parse_sound_cjson(root, "_PREVIEW_");
     cJSON_Delete(root);
+    if (!sound) {
+        respond_error(response, size, "Invalid sound data");
+        return;
+    }
+
+    if (!s_playback_mutex) {
+        free(sound);
+        respond_error(response, size, "Protocol not initialized");
+        return;
+    }
+
+    xSemaphoreTake(s_playback_mutex, portMAX_DELAY);
+    stop_playback_locked();
+    esp_err_t ret = chime_play_sound(sound, &s_playback.handle);
     free(sound);
-    respond_error(response, size, "Invalid sound data");
+    if (ret != ESP_OK) {
+        xSemaphoreGive(s_playback_mutex);
+        respond_error(response, size, "Failed to play preview");
+        return;
+    }
+    s_playback.active = true;
+    xSemaphoreGive(s_playback_mutex);
+    respond_ok(response, size, "Playing preview");
+}
+
+/* Command: TONE <freq_hz> <duration_ms> [waveform] */
+static void cmd_tone(const char* args, char* response, size_t size) {
+    if (!args || !args[0]) {
+        respond_error(response, size, "Usage: TONE <freq_hz> <duration_ms> [waveform]");
+        return;
+    }
+    float freq = 0.0f;
+    unsigned long dur = 250;
+    int wave = 2; // CHIME_WAVE_TRIANGLE
+    int parsed = sscanf(args, "%f %lu %d", &freq, &dur, &wave);
+    if (parsed < 1 || freq < 20.0f || freq > 20000.0f) {
+        respond_error(response, size, "Invalid frequency");
+        return;
+    }
+    if (dur == 0 || dur > 10000) dur = 250;
+    if (wave < 0 || wave >= CHIME_WAVE_MAX) wave = 2;
+
+    if (!s_playback_mutex) {
+        respond_error(response, size, "Protocol not initialized");
+        return;
+    }
+
+    chime_sound_t* sound = calloc(1, sizeof(*sound));
+    if (!sound) {
+        respond_error(response, size, "Out of memory");
+        return;
+    }
+
+    strncpy(sound->slot_id, "_TONE_", sizeof(sound->slot_id) - 1);
+    sound->total_duration_ms = (uint32_t)dur;
+    sound->layer_count = 1;
+    sound->layers[0].waveform = (chime_waveform_t)wave;
+    sound->layers[0].volume = 0.8f;
+    sound->layers[0].adsr.attack_ms = 4;
+    sound->layers[0].adsr.decay_ms = 20;
+    sound->layers[0].adsr.sustain_level = 0.75f;
+    sound->layers[0].adsr.release_ms = 45;
+    sound->layers[0].note_count = 1;
+    sound->layers[0].notes[0].start_time_ms = 0;
+    sound->layers[0].notes[0].duration_ms = (uint32_t)dur;
+    sound->layers[0].notes[0].frequency_hz = freq;
+
+    xSemaphoreTake(s_playback_mutex, portMAX_DELAY);
+    stop_playback_locked();
+    esp_err_t ret = chime_play_sound(sound, &s_playback.handle);
+    free(sound);
+    if (ret != ESP_OK) {
+        xSemaphoreGive(s_playback_mutex);
+        respond_error(response, size, "Failed to play tone");
+        return;
+    }
+    s_playback.active = true;
+    xSemaphoreGive(s_playback_mutex);
+    respond_ok(response, size, "Playing tone");
 }
 
 /* Command: DELETE <slot_id> */
@@ -558,6 +668,12 @@ esp_err_t chime_protocol_process(const char* command,
     }
     else if (strncmp(command, "UPLOAD ", 7) == 0) {
         cmd_upload(command + 7, response, response_size);
+    }
+    else if (strncmp(command, "PREVIEW ", 8) == 0) {
+        cmd_preview(command + 8, response, response_size);
+    }
+    else if (strncmp(command, "TONE ", 5) == 0) {
+        cmd_tone(command + 5, response, response_size);
     }
     else if (strncmp(command, "DELETE ", 7) == 0) {
         cmd_delete(command + 7, response, response_size);

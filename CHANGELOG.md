@@ -7,9 +7,10 @@ changes; it is not a guarantee of hardware validation.
 
 ### Added
 
-- Standalone zero-install Web Serial Studio (`tools-web/chimes_studio.html`)
-  featuring an interactive HTML5 Canvas piano roll, Web Audio synthesis preview,
-  12 bundled chime presets, 1-click C code generator, and direct hardware upload/audition.
+- Standalone zero-install System Chimes Studio (`tools-web/index.html` with
+  local CSS/JavaScript assets), featuring an interactive HTML5 Canvas piano
+  roll, local Web Audio synthesis preview, 12 bundled chime presets, 1-click C
+  code generator, and direct hardware upload/audition.
 - Automated validation suite in `tests/test_web_chimes_studio.py`.
 - Editable sound projects for network state, low battery, thermal warnings,
   hourly clock cues, and a one-shot wake alarm.

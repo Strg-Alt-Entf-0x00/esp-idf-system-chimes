@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Chimes Studio · ESP32 Synthesizer &amp; Multi-Layer DAW</title>
+  <link rel="stylesheet" href="css/design-system.css">
+  <link rel="stylesheet" href="css/console.css">
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="app-header">
+    <div class="brand-section">
+      <span class="brand-title">SYSTEM CHIMES STUDIO</span>
+      <span class="brand-sub">Multi-Layer Chime Designer</span>
+    </div>
+
+    <div class="header-actions">
+      <!-- Hardware Connect -->
+      <button class="icon-btn" id="btnConnect" type="button" data-tooltip="Connect ESP32 (115200 baud)" aria-label="Connect ESP32" aria-pressed="false">
+        <svg id="svgPlug" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M12 2v6m0 0l3-3m-3 3L9 5M5 11h14M7 11v5a5 5 0 0010 0v-5"></path>
+        </svg>
+      </button>
+
+      <!-- Terminal Drawer Toggle -->
+      <button class="icon-btn" id="btnToggleTerm" type="button" data-tooltip="Toggle Serial Console" aria-label="Toggle Serial Console" aria-expanded="false">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <polyline points="4 17 10 11 4 5"></polyline>
+          <line x1="12" y1="19" x2="20" y2="19"></line>
+        </svg>
+      </button>
+
+      <!-- Help Dialog -->
+      <button class="icon-btn" id="btnHelp" type="button" data-tooltip="Help and quick reference" aria-label="Open help">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"></path>
+          <path d="M12 17h.01"></path>
+        </svg>
+      </button>
+
+      <!-- Separator -->
+      <div class="header-divider" aria-hidden="true"></div>
+
+      <!-- ESP32 Hardware Output Volume Group -->
+      <div class="header-vol-group" role="group" aria-label="ESP32 hardware output volume">
+        <button class="icon-btn" id="btnMuteHwVol" type="button" data-tooltip="Mute ESP32 output" aria-label="Mute ESP32 output" aria-pressed="false" disabled>
+          <svg id="hwVolIconOn" class="state-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.5 8.5a5 5 0 0 1 0 7"></path>
+            <path d="M19 5a10 10 0 0 1 0 14"></path>
+          </svg>
+          <svg id="hwVolIconMuted" class="state-icon is-hidden" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="16" y1="9" x2="22" y2="15"></line>
+            <line x1="22" y1="9" x2="16" y2="15"></line>
+          </svg>
+        </button>
+        <input type="range" class="header-vol-slider" id="rngHwVol" min="0" max="1" step="0.05" value="0" disabled aria-label="ESP32 hardware output volume" data-tooltip="ESP32 hardware output volume">
+        <span class="header-vol-val" id="txtHwVol">-</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Secondary Transport Toolbar -->
+  <section class="studio-toolbar" aria-label="Sound editor controls">
+    <div class="transport-bar">
+      <!-- Play/Stop Toggle Button -->
+      <button class="icon-btn transport-play-btn" id="btnPlay" type="button" data-tooltip="Play pattern (Spacebar)" aria-label="Play pattern" aria-pressed="false">
+        <svg id="playIcon" class="state-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+        <svg id="stopIcon" class="state-icon is-hidden" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+        </svg>
+      </button>
+
+      <span class="toolbar-sep" aria-hidden="true">|</span>
+
+      <!-- 4 Project & Slot Buttons -->
+      <div class="toolbar-btn-group" role="group" aria-label="Project and slot actions">
+        <button class="icon-btn" id="btnNew" type="button" data-tooltip="New project" aria-label="New project">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button class="icon-btn" id="btnImport" type="button" data-tooltip="Import JSON" aria-label="Import JSON">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+        </button>
+        <button class="icon-btn" id="btnExport" type="button" data-tooltip="Export JSON" aria-label="Export JSON">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        </button>
+        <button class="icon-btn" id="btnUploadSlot" type="button" data-tooltip="Upload active chime to ESP32 slot" aria-label="Upload active chime to ESP32 slot">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+        </button>
+      </div>
+
+      <span class="toolbar-sep" aria-hidden="true">|</span>
+
+      <!-- BPM Spinbox -->
+      <div class="input-group bpm-control">
+        <label for="numBpm">BPM</label>
+        <input type="number" id="numBpm" value="120" min="40" max="300" style="width: 55px;" aria-label="Tempo in beats per minute">
+      </div>
+    </div>
+
+    <!-- Right Controls: Accessible Snap Fallback -->
+    <div class="transport-right">
+      <!-- Hidden/Accessible Snap Select for programmatic & test compatibility -->
+      <select id="selSnap" aria-label="Snap interval" hidden aria-hidden="true">
+        <option value="10">10 ms</option>
+        <option value="25" selected>25 ms</option>
+        <option value="50">50 ms</option>
+        <option value="100">100 ms</option>
+        <option value="250">250 ms</option>
+        <option value="0">Off</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- Main DAW Workspace -->
+  <div class="main-workspace">
+
+    <!-- Left: Track/Layer List & Presets -->
+    <div class="tracks-panel">
+      <!-- Target Destination Switch: PC Web Audio vs ESP32 Speaker -->
+      <div class="sidepanel-target-row">
+        <div class="target-switch" role="radiogroup" aria-label="Playback output destination">
+          <button type="button" class="target-pill active" id="btnTargetPc" data-target="pc" data-tooltip="Preview in browser (PC Web Audio)" aria-checked="true" role="radio">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <span>PC AUDIO</span>
+          </button>
+          <button type="button" class="target-pill" id="btnTargetEsp" data-target="esp" data-tooltip="Connect ESP32 hardware to enable speaker output" aria-checked="false" role="radio" disabled>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.5 8.5a5 5 0 0 1 0 7"></path>
+            </svg>
+            <span>ESP32 SPEAKER</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- System Chimes Preset Dropdown with Erase All Button (above layers header) -->
+      <div class="tracks-preset-row">
+        <select id="selPresets" aria-label="Sound preset">
+          <option value="">Select preset...</option>
+        </select>
+        <button class="icon-btn btn-danger-icon" id="btnEraseAll" type="button" data-tooltip="Erase all stored sounds on ESP32" aria-label="Erase all stored sounds" disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Layers Header -->
+      <div class="panel-header">
+        <span>LAYERS (<span id="layerCountText">1</span> / 8)</span>
+        <button class="icon-btn" id="btnAddLayer" type="button" data-tooltip="Add sound layer (max 8)" aria-label="Add sound layer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Dynamically Rendered Layer Cards -->
+      <div class="tracks-list" id="tracksList"></div>
+    </div>
+
+    <div class="center-section">
+      <div class="piano-roll-container" id="pianoRollContainer">
+        <canvas id="pianoCanvas"></canvas>
+        <!-- Floating HUD Toast for Zoom & Snap Wheel Changes -->
+        <div id="pianoHudToast" class="piano-hud-toast" aria-live="polite"></div>
+        <!-- Floating Note Tooltip on Hover -->
+        <div id="noteHoverTooltip" class="note-hover-tooltip" style="display: none;">
+          <div class="note-tooltip-header">
+            <span id="inspPitch">C5</span> <small id="inspMidi">(MIDI 72)</small>
+          </div>
+          <div class="note-tooltip-body">
+            <div class="tooltip-stat"><span>Freq:</span> <strong id="inspFreq">523.3</strong> Hz</div>
+            <div class="tooltip-stat"><span>Start:</span> <strong id="inspStart">150</strong> ms</div>
+            <div class="tooltip-stat"><span>Duration:</span> <strong id="inspDuration">150</strong> ms</div>
+          </div>
+          <div class="note-tooltip-hint">Double-click, right-click, or Del to delete</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Collapsible Bottom Terminal Drawer -->
+  <div class="bottom-terminal-drawer" id="terminalDrawer" role="region" aria-label="Serial console" aria-hidden="true" inert>
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <polyline points="4 17 10 11 4 5"></polyline>
+          <line x1="12" y1="19" x2="20" y2="19"></line>
+        </svg>
+        <span>Serial Console · 115200 baud</span>
+      </div>
+      <div class="drawer-actions" role="group" aria-label="Console actions">
+        <button class="icon-btn" id="btnCopyLog" type="button" data-tooltip="Copy console" aria-label="Copy console">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="8" y="8" width="13" height="13" rx="2"></rect>
+            <path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"></path>
+          </svg>
+        </button>
+        <button class="icon-btn" id="btnDownloadLog" type="button" data-tooltip="Download console" aria-label="Download console">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </button>
+        <button class="icon-btn" id="btnClearLog" type="button" data-tooltip="Clear console" aria-label="Clear console">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </button>
+        <button class="icon-btn" id="btnCloseTerm" type="button" data-tooltip="Close console" aria-label="Close console">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="drawer-terminal-box" id="termBox" role="log" aria-label="Serial output" aria-live="polite"></div>
+    <div class="drawer-command-row">
+      <input type="text" id="cmdInput" placeholder="Type a command and press Enter..." autocomplete="off" spellcheck="false" aria-label="Serial command">
+      <button class="icon-btn" id="btnSendCmd" type="button" data-tooltip="Send command" aria-label="Send command">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M22 2 11 13"></path>
+          <path d="m22 2-7 20-4-9-9-4 20-7Z"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Status Bar Footer (Consistent Layout: Dot + Disconnected far left!) -->
+  <footer class="status-bar">
+    <div class="status-left">
+      <div class="status-badge" id="statusBadge" role="status">
+        <span class="status-dot"></span>
+        <span id="badgeText">Disconnected</span>
+      </div>
+      <span class="status-bar-sep" aria-hidden="true">|</span>
+      <div class="status-stats">
+        <span class="stat-pill">Duration: <strong id="statDuration">0 ms</strong></span>
+        <span class="stat-pill">Notes: <strong id="statNotes">0</strong></span>
+        <span class="stat-pill stat-pill-layers">Layers: <strong id="statLayers">1</strong></span>
+        <span class="stat-pill stat-pill-playhead">Playhead: <strong id="statPlayhead">0 ms</strong></span>
+        <span class="stat-pill stat-pill-slots">Slots: <span id="slotCountBadge">Not queried</span></span>
+      </div>
+    </div>
+    <div class="status-right">
+      <span class="status-meta">WEB SERIAL</span>
+      <span class="status-meta">115200 BAUD</span>
+    </div>
+  </footer>
+
+  <!-- Target Slot & Hardware Dialog -->
+  <dialog id="slot-dialog" class="modal" aria-labelledby="slot-dialog-title">
+    <div class="modal-card" id="tabHw">
+      <div class="modal-header">
+        <div>
+          <p class="modal-eyebrow">ESP32 HARDWARE SLOTS</p>
+          <h2 id="slot-dialog-title">Upload Chime to Hardware Flash</h2>
+        </div>
+        <button class="icon-btn" id="btnCloseSlotModal" type="button" data-tooltip="Close" aria-label="Close dialog">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="slot-edit-section">
+          <div class="input-row">
+            <label for="txtSlotId">Slot ID:</label>
+            <input type="text" id="txtSlotId" value="BOOT_SUCCESS" maxlength="15" spellcheck="false" autocomplete="off" aria-label="Slot ID">
+          </div>
+          <div class="input-row">
+            <label for="txtProjectName">Chime Name:</label>
+            <input type="text" id="txtProjectName" value="Boot Success" spellcheck="false" autocomplete="off" aria-label="Chime Name">
+          </div>
+          <div class="slot-action-grid">
+            <button class="btn btn-primary" id="btnUploadSlotModal" type="button">⬆ Upload to ESP32 Flash</button>
+          </div>
+        </div>
+        <!-- Hidden/accessible hardware controls for test suite -->
+        <div class="slots-hw-hidden" hidden aria-hidden="true">
+          <button id="btnPlayDevice" type="button" disabled>Play Device</button>
+          <button id="btnStopDevice" type="button" disabled>Stop Device</button>
+          <button id="btnQuerySlots" type="button" disabled>Query Slots</button>
+          <div id="slotListContainer"></div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Help Dialog -->
+  <dialog id="help-dialog" class="modal help-dialog" aria-labelledby="help-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <p class="modal-eyebrow">SYSTEM CHIMES STUDIO</p>
+          <h2 id="help-title">Hardware Quick Reference</h2>
+        </div>
+        <button id="close-help-dialog" class="icon-btn" type="button" data-tooltip="Close help" aria-label="Close help">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="m18 6-12 12M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="help-content">
+        <section>
+          <h3>Connect Hardware</h3>
+          <p>Use the USB icon in the header to connect to the ESP32 over Web Serial at 115200 baud. Hardware controls unlock once the System Chimes firmware signature is verified.</p>
+        </section>
+        <section>
+          <h3>Piano Roll Navigation &amp; Mouse Wheel Controls</h3>
+          <p>Click on the grid to create notes. Double-click, right-click, or press <kbd>Del</kbd> to delete the selected note. Hovering over any note displays its Pitch, Frequency, Start, and Duration in a floating tooltip.</p>
+          <ul class="help-shortcuts-list">
+            <li><strong>Mouse Wheel:</strong> Scroll vertically through octaves and pitches</li>
+            <li><strong>Shift + Wheel:</strong> Pan horizontally along the timeline</li>
+            <li><strong>Ctrl + Wheel:</strong> Zoom in / out with HUD percentage feedback</li>
+            <li><strong>Alt + Wheel:</strong> Cycle snap grid resolution (10ms, 25ms, 50ms, 100ms, 250ms, Off)</li>
+          </ul>
+        </section>
+        <section>
+          <h3>Playback Target</h3>
+          <p>Toggle between PC Preview and ESP32 Speaker. In ESP32 mode, sound outputs through the physical speaker on the device.</p>
+        </section>
+        <section>
+          <h3>Serial Console</h3>
+          <p>Open the console with the terminal button to monitor commands or communicate directly with the ESP32 firmware.</p>
+        </section>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Hidden elements for test suite & file inputs -->
+  <input type="file" id="fileInput" accept=".json,.chime.json" hidden>
+  <button id="btnDeleteNote" hidden aria-hidden="true">Delete Note</button>
+  <div class="preview-vol-hidden" hidden aria-hidden="true">
+    <button class="icon-btn" id="btnMuteMasterVol" type="button" data-tooltip="Mute PC preview" aria-label="Mute PC preview" aria-pressed="false">
+      <svg id="masterVolIconOn" class="state-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.5 8.5a5 5 0 0 1 0 7"></path></svg>
+      <svg id="masterVolIconMuted" class="state-icon is-hidden" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="16" y1="9" x2="22" y2="15"></line></svg>
+    </button>
+    <input type="range" class="header-vol-slider" id="rngMasterVol" min="0" max="1" step="0.05" value="0.8" aria-label="PC preview master volume" data-tooltip="PC preview master volume">
+    <span id="txtMasterVol" class="header-vol-val">80%</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/presets.js"></script>
+  <script src="js/model.js"></script>
+  <script src="js/audio-engine.js"></script>
+  <script src="js/piano-roll.js"></script>
+  <script src="js/project-files.js"></script>
+  <script src="js/terminal.js"></script>
+  <script src="js/serial-slots.js"></script>
+</body>
+</html>

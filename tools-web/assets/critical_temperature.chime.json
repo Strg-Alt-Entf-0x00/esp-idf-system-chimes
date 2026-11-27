@@ -1,0 +1,70 @@
+{
+  "project": {
+    "version": "2.1.0",
+    "name": "Critical Temperature",
+    "slot_id": "TEMP_CRIT",
+    "total_duration_ms": 820,
+    "created": "2026-11-07T00:00:00",
+    "modified": "2026-11-07T00:00:00"
+  },
+  "global": {
+    "master_volume": 0.8,
+    "bpm": 120,
+    "snap_enabled": true,
+    "grid_resolution_ms": 10
+  },
+  "layers": [
+    {
+      "layer_id": 1,
+      "name": "Critical Thermal Alert",
+      "waveform": "SAWTOOTH",
+      "volume": 0.42,
+      "mute": false,
+      "solo": false,
+      "default_adsr": {
+        "attack_ms": 2,
+        "decay_ms": 30,
+        "sustain": 0.35,
+        "release_ms": 60
+      },
+      "notes": [
+        {
+          "id": "50000000-0000-4000-8000-000000000001",
+          "frequency_hz": 1046.5,
+          "start_time_ms": 0,
+          "duration_ms": 180,
+          "adsr": {
+            "attack_ms": 2,
+            "decay_ms": 30,
+            "sustain": 0.35,
+            "release_ms": 60
+          }
+        },
+        {
+          "id": "50000000-0000-4000-8000-000000000002",
+          "frequency_hz": 783.99,
+          "start_time_ms": 250,
+          "duration_ms": 180,
+          "adsr": {
+            "attack_ms": 2,
+            "decay_ms": 30,
+            "sustain": 0.35,
+            "release_ms": 60
+          }
+        },
+        {
+          "id": "50000000-0000-4000-8000-000000000003",
+          "frequency_hz": 523.25,
+          "start_time_ms": 510,
+          "duration_ms": 310,
+          "adsr": {
+            "attack_ms": 2,
+            "decay_ms": 30,
+            "sustain": 0.35,
+            "release_ms": 60
+          }
+        }
+      ]
+    }
+  ]
+}
